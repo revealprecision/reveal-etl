@@ -11,6 +11,13 @@ resources:
 pr:
 - none
 
+variables:
+  dockerRegistryServiceConnection: 'akros-docker-registry'
+  imageRepository: 'akros/reveal-etl'
+  containerRegistry: 'akros.azurecr.io'
+  dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
+  tag: '$(Build.BuildId)'
+
 stages:
 - stage: Build
   displayName: Build and push stage
