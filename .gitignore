@@ -1,3 +1,4 @@
 etl.log
 custom
 __pycache__
+.pylint
