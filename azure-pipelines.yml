@@ -12,9 +12,8 @@ pr:
 - none
 
 variables:
-  dockerRegistryServiceConnection: 'akros-docker-registry'
-  imageRepository: 'akros/reveal-etl'
-  containerRegistry: 'akros.azurecr.io'
+  dockerRegistryServiceConnection: 'revealprecision-docker-registry'
+  imageRepository: 'reveal-precision/reveal-etl'
   dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
   tag: '$(Build.BuildId)'
 
