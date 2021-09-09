@@ -13,7 +13,8 @@ pr:
 
 variables:
   dockerRegistryServiceConnection: 'revealprecision-docker-registry'
-  imageRepository: 'reveal-precision/reveal-etl'
+  imageRepository: 'revealprecision/reveal-etl'
+  containerRegistry: 'hub.docker.com'
   dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
   tag: '$(Build.BuildId)'
 
