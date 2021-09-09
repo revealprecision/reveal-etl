@@ -11,14 +11,6 @@ resources:
 pr:
 - none
 
-variables:
-  # Container registry service connection established during pipeline creation
-  dockerRegistryServiceConnection: '45d1dffa-0911-4525-881d-21d66d2c25d6'
-  imageRepository: 'akros/reveal-etl'
-  containerRegistry: 'akros.azurecr.io'
-  dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
-  tag: '$(Build.BuildId)'
-
 stages:
 - stage: Build
   displayName: Build and push stage
