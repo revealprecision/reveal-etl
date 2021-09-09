@@ -1,0 +1,6 @@
+psycopg2
+redis
+configparser
+uuid
+datetime
+filelock

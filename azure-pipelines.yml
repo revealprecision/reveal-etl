@@ -1,0 +1,44 @@
+# Docker
+# Build and push an image to Azure Container Registry
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+
+trigger:
+- main
+
+resources:
+- repo: self
+
+pr:
+- none
+
+variables:
+  # Container registry service connection established during pipeline creation
+  dockerRegistryServiceConnection: '45d1dffa-0911-4525-881d-21d66d2c25d6'
+  imageRepository: 'akros/reveal-etl'
+  containerRegistry: 'akros.azurecr.io'
+  dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
+  tag: '$(Build.BuildId)'
+
+stages:
+- stage: Build
+  displayName: Build and push stage
+  jobs:
+  - job: Build
+    displayName: Build
+    pool:
+      name: AkrosInternal
+    steps:
+    - task: Docker@2
+      displayName: Build and push an image to container registry
+      inputs:
+        command: buildAndPush
+        repository: $(imageRepository)
+        dockerfile: $(dockerfilePath)
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
+    - task: Bash@3
+      displayName: Clean old containers
+      inputs:
+        targetType: inline
+        script: az acr run --cmd "acr purge --filter 'akros/reveal-etl:^[0-9]*' --ago 14d --keep 10 --untagged --concurrency 5" -r akros /dev/null
