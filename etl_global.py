@@ -1,3 +1,5 @@
+"""Global configs"""
+
 import configparser
 
 config = configparser.ConfigParser()
