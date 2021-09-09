@@ -49,4 +49,4 @@ For support please contact Stefanus Heath at Akros <sheath@akros.com>
 
 ## Repository
 
-This repository is shared under the Apache License v2.0 <https://www.apache.org/licenses/LICENSE-2.0>
+This repository is shared under the T.B.C
