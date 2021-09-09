@@ -36,8 +36,4 @@ stages:
         containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(tag)
-    - task: Bash@3
-      displayName: Clean old containers
-      inputs:
-        targetType: inline
-        script: az acr run --cmd "acr purge --filter 'akros/reveal-etl:^[0-9]*' --ago 14d --keep 10 --untagged --concurrency 5" -r akros /dev/null
+  
