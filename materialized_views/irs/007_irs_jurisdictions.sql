@@ -154,7 +154,7 @@ FROM (
             LEFT JOIN LATERAL (
                 SELECT
                     COALESCE(count(irs_focus_area_base.jurisdiction_id), (0)::bigint) AS totareas,
-                    COALESCE(count(irs_focus_area_base.jurisdiction_id), (0)::bigint) AS targareas,
+                    COALESCE(count(irs_focus_area_base.jurisdiction_id) FILTER (WHERE (irs_focus_area_base.targstruct > 0)), (0)::bigint) AS targareas,
                     COALESCE(sum(irs_focus_area_base.targstruct), (0)::numeric) AS targstruct,
                     COALESCE(count(irs_focus_area_base.jurisdiction_id) FILTER (WHERE (irs_focus_area_base.foundstruct > 0)), (0)::bigint) AS visitedareas,
                     COALESCE(count(irs_focus_area_base.jurisdiction_id) FILTER (WHERE (irs_focus_area_base.spraycov > 0.85)), (0)::bigint) AS spraycovhigh,

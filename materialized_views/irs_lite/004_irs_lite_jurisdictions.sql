@@ -87,7 +87,7 @@ FROM
             LEFT JOIN LATERAL (
                 SELECT
                     key as jurisdiction_id,
-                    COALESCE(data->>'value', '0')::INTEGER as target
+                    COALESCE(data ->> 0, '0')::INTEGER as target
                 FROM opensrp_settings
                 WHERE identifier = 'jurisdiction_metadata-target'
                 AND lite_jurisdictions.jurisdiction_id = opensrp_settings.key
@@ -97,7 +97,7 @@ FROM
             LEFT JOIN LATERAL (
                 SELECT
                     key as jurisdiction_id,
-                    COALESCE(data->>'value', '0')::INTEGER as structure
+                    COALESCE(data ->> 0, '0')::INTEGER as structure
                 FROM opensrp_settings
                 WHERE identifier = 'jurisdiction_metadata-structures'
                 AND lite_jurisdictions.jurisdiction_id = opensrp_settings.key
