@@ -49,9 +49,9 @@ FROM (
             (
                 (
                     (reveal.irs_plans
-                    LEFT JOIN reveal.plan_jurisdiction ON (((plan_jurisdiction.plan_id)::text = (irs_plans.plan_id)::text)))
-                    LEFT JOIN reveal.jurisdictions_tree jurisdictions_tree ON (((plan_jurisdiction.jurisdiction_id)::text = (jurisdictions_tree.jurisdiction_id)::text)))
-                    LEFT JOIN reveal.locations ON ((((plan_jurisdiction.jurisdiction_id)::text = (locations.jurisdiction_id)::text) OR ((locations.jurisdiction_id)::text = ANY ((jurisdictions_tree.jurisdiction_path)::text[])))))
+                    JOIN reveal.plan_jurisdiction ON (((plan_jurisdiction.plan_id)::text = (irs_plans.plan_id)::text)))
+                    JOIN reveal.jurisdictions_tree jurisdictions_tree ON (((plan_jurisdiction.jurisdiction_id)::text = (jurisdictions_tree.jurisdiction_id)::text)))
+                    JOIN reveal.locations ON ((((plan_jurisdiction.jurisdiction_id)::text = (locations.jurisdiction_id)::text) OR ((locations.jurisdiction_id)::text = ANY ((jurisdictions_tree.jurisdiction_path)::text[])))))
                     JOIN reveal.irs_structure_jurisdictions irs_structure_jurisdictions ON (((irs_structure_jurisdictions.id)::text = (locations.id)::text)))
                     LEFT JOIN LATERAL (
                         SELECT

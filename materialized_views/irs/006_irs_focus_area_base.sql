@@ -72,7 +72,10 @@ FROM (
         health_center_jurisdictions.id AS health_center_jurisdiction_id,
         health_center_jurisdictions.name AS health_center_jurisdiction_name,
         irs_structures.totstruct,
-        irs_structures.targstruct,
+        CASE
+            WHEN foundstruct > 0 THEN irs_structures.targstruct
+            ELSE operational_target.target
+        END AS targstruct,
         irs_structures.rooms_eligible,
         irs_structures.rooms_sprayed,
         irs_structures.sprayed_rooms_eligible,
@@ -101,18 +104,18 @@ FROM (
         irs_structures.latest_spray_event_id,
         irs_structures.latest_spray_event_date,
         coverage_query.spraycov,
-            CASE
-                WHEN (irs_structures.totstruct = 0) THEN (0)::numeric
-                ELSE ((irs_structures.foundstruct)::numeric / (irs_structures.totstruct)::numeric)
-            END AS spraytarg,
-            CASE
-                WHEN (irs_structures.foundstruct = 0) THEN (0)::numeric
-                ELSE ((irs_structures.sprayedstruct)::numeric / (irs_structures.foundstruct)::numeric)
-            END AS spraysuccess,
-            CASE
-                WHEN (irs_structures.totstruct = 0) THEN NULL::numeric
-                ELSE ((irs_structures.sprayedstruct)::numeric / (irs_structures.totstruct)::numeric)
-            END AS spray_effectiveness,
+        CASE
+            WHEN (irs_structures.totstruct = 0) THEN (0)::numeric
+            ELSE ((irs_structures.foundstruct)::numeric / (irs_structures.totstruct)::numeric)
+        END AS spraytarg,
+        CASE
+            WHEN (irs_structures.foundstruct = 0) THEN (0)::numeric
+            ELSE ((irs_structures.sprayedstruct)::numeric / (irs_structures.foundstruct)::numeric)
+        END AS spraysuccess,
+        CASE
+            WHEN (irs_structures.totstruct = 0) THEN NULL::numeric
+            ELSE ((irs_structures.sprayedstruct)::numeric / (irs_structures.totstruct)::numeric)
+        END AS spray_effectiveness,
         GREATEST((0)::numeric, ceil((((irs_structures.totstruct)::numeric * 0.9) - (irs_structures.sprayedstruct)::numeric))) AS structures_remaining_to_90_se,
         (GREATEST((0)::numeric, (((irs_structures.totstruct)::numeric * 0.9) - (irs_structures.sprayedstruct)::numeric)) / 15.0) AS tla_days_to_90_se,
             CASE
@@ -138,13 +141,13 @@ FROM (
                     (
                         (
                             (reveal.plans
-                            LEFT JOIN reveal.irs_plan_jurisdictions irs_plan_jurisdictions ON (((plans.identifier)::text = (irs_plan_jurisdictions.plan_id)::text)))
-                            LEFT JOIN reveal.irs_jurisdictions_tree irs_jurisdictions_tree ON (((irs_plan_jurisdictions.zambia_jurisdiction_id)::text = (irs_jurisdictions_tree.jurisdiction_id)::text)))
-                            LEFT JOIN reveal.jurisdictions health_center_jurisdictions ON (((health_center_jurisdictions.id)::text = (irs_jurisdictions_tree.jurisdiction_path[4])::text)))
+                            JOIN reveal.irs_plan_jurisdictions irs_plan_jurisdictions ON (((plans.identifier)::text = (irs_plan_jurisdictions.plan_id)::text)))
+                            JOIN reveal.irs_jurisdictions_tree irs_jurisdictions_tree ON (((irs_plan_jurisdictions.zambia_jurisdiction_id)::text = (irs_jurisdictions_tree.jurisdiction_id)::text)))
+                            JOIN reveal.jurisdictions health_center_jurisdictions ON (((health_center_jurisdictions.id)::text = (irs_jurisdictions_tree.jurisdiction_path[4])::text)))
                             LEFT JOIN LATERAL (
                                 SELECT
                                     COALESCE(count(irs_structures.structure_id), (0)::bigint) AS totstruct,
-                                    COALESCE(count(irs_structures.structure_id) FILTER (WHERE ((irs_structures.structure_status)::text = ANY ((ARRAY['Active'::character varying, 'Pending Review'::character varying])::text[]))), (0)::bigint) AS targstruct,
+                                    COALESCE(count(irs_structures.structure_id) FILTER (WHERE (irs_structures.structure_status::text = ANY ((ARRAY['Active'::character varying, 'Pending Review'::character varying])::text[]))), (0)::bigint) AS targstruct,
                                     COALESCE(count(irs_structures.structure_id) FILTER (WHERE (irs_structures.business_status <> 'Not Visited'::text)), (0)::bigint) AS foundstruct,
                                     COALESCE(count(irs_structures.structure_id) FILTER (WHERE (irs_structures.business_status = 'Not Sprayed'::text)), (0)::bigint) AS notsprayed,
                                     COALESCE(count(irs_structures.structure_id) FILTER (WHERE (irs_structures.business_status = ANY (ARRAY['Partially Sprayed'::text, 'Complete'::text]))), (0)::bigint) AS sprayedstruct,
@@ -181,6 +184,14 @@ FROM (
                                         ELSE ((irs_structures.sprayedstruct)::numeric / (irs_structures.totstruct)::numeric)
                                     END AS spraycov
                             ) coverage_query ON (true))
+                            LEFT JOIN LATERAL (
+                                SELECT
+                                    opensrp_settings.key as jurisdiction_id,
+                                    (opensrp_settings.data ->> 0)::numeric AS target
+                                FROM opensrp_settings
+                                WHERE identifier = plans.identifier
+                                AND opensrp_settings.key = irs_plan_jurisdictions.zambia_jurisdiction_id
+                            ) AS operational_target ON TRUE
                             LEFT JOIN LATERAL (
                                 SELECT
                                     COALESCE(count(irs_structures.structure_id) FILTER (WHERE (irs_structures.business_status = 'Not Eligible'::text)), (0)::bigint) AS noteligible,
