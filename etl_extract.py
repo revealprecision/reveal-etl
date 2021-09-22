@@ -17,12 +17,11 @@ def extract_opensrp_data(src,dst):
     if src == "core.task":
         sql = "SELECT json FROM " + src + " WHERE (json ->>  'lastModified')::timestamp > (NOW() - INTERVAL '" + etl_global.data_pull_interval + " HOUR')::timestamp ORDER BY json ->>  'lastModified'"
     elif src == "core.event":
-        # sql = "select max(full_json ->> 'dateCreated') as max_date from reveal.raw_events;"
-        # max_date = fetch_reveal_query(sql)
-        # print(max_date[0][0])
-        # print("SELECT json FROM " + src + " WHERE (json ->> 'dateCreated')::timestamp > (('" + max_date[0][0] + "')::date - INTERVAL '" + etl_global.data_pull_interval + " HOUR')::interval order by json ->>  'dateCreated';")
-        #sql = "SELECT json FROM " + src + " WHERE (json ->> 'dateCreated')::timestamp > (('" + max_date[0][0] + "')::date - INTERVAL '" + etl_global.data_pull_interval + " HOUR')::interval order by json ->>  'dateCreated';"
-        sql = "SELECT json FROM " + src + " WHERE (json ->>  'dateCreated')::timestamp > (NOW() - INTERVAL '" + etl_global.data_pull_interval + " HOUR')::timestamp"
+        sql = "select max(full_json ->> 'dateCreated') as max_date from reveal.raw_events;"
+        max_date = fetch_reveal_query(sql)
+        print(max_date[0][0])
+        print("SELECT json FROM " + src + " WHERE (json ->> 'dateCreated')::timestamp > (('" + max_date[0][0] + "')::date - INTERVAL '" + etl_global.data_pull_interval + " HOUR')::timestamp order by json ->>  'dateCreated';")
+        sql = "SELECT json FROM " + src + " WHERE (json ->> 'dateCreated')::timestamp > (('" + max_date[0][0] + "')::date - INTERVAL '" + etl_global.data_pull_interval + " HOUR')::timestamp order by json ->>  'dateCreated';"
     elif src == "core.settings_metadata":
         sql = "select max((data ->> 'serverVersion')::integer) as server_version from reveal.raw_settings;"
         server_version = fetch_reveal_query(sql)
