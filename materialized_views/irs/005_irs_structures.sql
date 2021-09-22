@@ -41,6 +41,7 @@ SELECT
     COALESCE(events_query.business_status, (tasks_query.business_status)::text, 'No Tasks'::text) AS business_status,
     COALESCE(events_query.sprayed_values, (ARRAY[]::character varying[])::text[]) AS sprayed_values,
     COALESCE(events_query.notsprayed_reasons, (ARRAY[]::character varying[])::text[]) AS notsprayed_reasons,
+    COALESCE(events_query.mix_serial_numbers, 0) AS mix_serial_numbers,
     COALESCE(events_query.duplicate, false) AS duplicate,
     COALESCE(events_query.sprayed_duplicate, false) AS sprayed_duplicate
 FROM (
@@ -67,6 +68,7 @@ FROM (
                             subq.structure_sprayed,
                             subq.business_status,
                             subq.notsprayed_reason,
+                            subq.mix_serial_numbers,
                             subq.sprayed_totalpop,
                             subq.sprayed_totalmale,
                             subq.sprayed_totalfemale,
@@ -112,9 +114,21 @@ FROM (
                                 COALESCE((events.form_data ->> 'notsprayed_females')::text, '0'::text)::integer AS notsprayed_females,
                                 COALESCE((events.form_data ->> 'notsprayed_pregwomen')::text, '0'::text)::integer AS notsprayed_pregwomen,
                                 COALESCE((events.form_data ->> 'notsprayed_childrenU5')::text, '0'::text)::integer AS notsprayed_childrenU5,
-                                COALESCE(((events.form_data -> 'notsprayed_reason'::text) ->> 0), ''::text) AS notsprayed_reason
+                                COALESCE(((events.form_data -> 'notsprayed_reason'::text) ->> 0), ''::text) AS notsprayed_reason,
+                                COALESCE(mix_serial_numbers_query.mix_serial_numbers::text, '0')::integer AS mix_serial_numbers
                             FROM (reveal.events
                             LEFT JOIN reveal.tasks ON (((tasks.identifier)::text = (events.task_id)::text)))
+                            LEFT JOIN LATERAL (
+                                SELECT
+                                    event_id,
+                                    count(response) AS mix_serial_numbers
+                                FROM
+                                    reveal.form_data
+                                WHERE form_data.event_id = events.id
+                                AND field_code LIKE 'serial_number_%'
+                                AND response NOT LIKE '%openmrs%'
+                                GROUP BY event_id
+                            ) mix_serial_numbers_query ON TRUE
                             WHERE (((locations.id)::text = (events.base_entity_id)::text)
                             AND ((events.entity_type)::text = 'Structure'::text)
                             AND ((events.event_type)::text = 'Spray'::text)

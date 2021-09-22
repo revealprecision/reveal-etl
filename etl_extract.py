@@ -5,7 +5,7 @@ from datetime import datetime
 import configparser
 import logging
 import etl_global
-from etl_database import store_reveal_query,fetch_opensrp_query
+from etl_database import store_reveal_query,fetch_opensrp_query,fetch_reveal_query
 from etl_transform import transform_reveal_location_data
 
 config = configparser.ConfigParser()
@@ -15,19 +15,29 @@ def extract_opensrp_data(src,dst):
     """extracts the data from opensrp into the reveal warehouse"""
 
     if src == "core.task":
-        sql = "SELECT json FROM " + src + " WHERE (json ->>  'lastModified')::timestamp > (NOW() - INTERVAL '" + etl_global.data_pull_interval + " HOUR')::timestamp"
+        sql = "SELECT json FROM " + src + " WHERE (json ->>  'lastModified')::timestamp > (NOW() - INTERVAL '" + etl_global.data_pull_interval + " HOUR')::timestamp ORDER BY json ->>  'lastModified'"
     elif src == "core.event":
+        # sql = "select max(full_json ->> 'dateCreated') as max_date from reveal.raw_events;"
+        # max_date = fetch_reveal_query(sql)
+        # print(max_date[0][0])
+        # print("SELECT json FROM " + src + " WHERE (json ->> 'dateCreated')::timestamp > (('" + max_date[0][0] + "')::date - INTERVAL '" + etl_global.data_pull_interval + " HOUR')::interval order by json ->>  'dateCreated';")
+        #sql = "SELECT json FROM " + src + " WHERE (json ->> 'dateCreated')::timestamp > (('" + max_date[0][0] + "')::date - INTERVAL '" + etl_global.data_pull_interval + " HOUR')::interval order by json ->>  'dateCreated';"
         sql = "SELECT json FROM " + src + " WHERE (json ->>  'dateCreated')::timestamp > (NOW() - INTERVAL '" + etl_global.data_pull_interval + " HOUR')::timestamp"
+    elif src == "core.settings_metadata":
+        sql = "select max((data ->> 'serverVersion')::integer) as server_version from reveal.raw_settings;"
+        server_version = fetch_reveal_query(sql)
+        print(server_version[0][0])
+        sql = "SELECT json FROM " + src + " WHERE (json ->> 'serverVersion')::integer > " + str(server_version[0][0])
     else:
         sql = "SELECT json FROM " + src
 
     data = fetch_opensrp_query(sql)
-    logging.info('Found records in %s: %s',src,len(data))
+    record_count = len(data)
+    logging.info('Found records in %s: %s',src,record_count)
 
     ### adding in structures that have been added
     for data_line in data:
         if ((src == "core.event") and (data_line[0]['eventType'] == 'Register_Structure')):
-            print(data_line[0]['serverVersion'])
             sql = "select json from core.structure where json ->> 'id' = '" + data_line[0]['baseEntityId'] + "'"
             location = fetch_opensrp_query(sql)
             if len(location) == 0:
@@ -36,16 +46,22 @@ def extract_opensrp_data(src,dst):
                 #{"id": "e643dd22-68fd-434f-8af5-cb3d4d787ce2", "type": "Feature", "geometry": {"type": "Point", "coordinates": [-15.116157084727519, 15.394756859242316]}, "properties": {"uid": "368f64f1-c15b-4a92-a050-fd206dd79de4", "type": "Residential Structure", "status": "Pending Review", "version": 0, "parentId": "0ca477ab-746b-43dd-8d12-c6d960a16ee6", "geographicLevel": 0, "effectiveStartDate": "2021-06-20T1258"}, "serverVersion": 130017}
 
             try:
-                logging.info('New structures found, loading new structures')
+                logging.info('New structures found, extracting new structures')
                 create_reveal_raw_data("core.structure","reveal.raw_locations",location[0])
-                transform_reveal_location_data(location[0][0]['serverVersion'])
-                sql = "SELECT process_structure_geo_hierarchy_structure_queue();"
-                store_reveal_query(sql)
+                #transform_reveal_location_data(location[0][0]['serverVersion'])
+                #sql = "SELECT process_structure_geo_hierarchy_structure_queue();"
+                #store_reveal_query(sql)
             except (Exception,) as error:
                 logging.error('DATALINE missing location information: %s', error)
                 #break THIS NEEDS TO BE TURNED ON AS THE ABOVE IS FIXED
 
+        record_count = record_count - 1
+        print("records left: " + str(record_count))
         create_reveal_raw_data(src,dst,data_line)
+
+    if src in ("core.event","core.structures"):
+        sql = "SELECT process_structure_geo_hierarchy_structure_queue();"
+        store_reveal_query(sql)
 
 
 def create_reveal_raw_data(src,dst,data_json):
