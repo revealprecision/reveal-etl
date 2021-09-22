@@ -87,8 +87,6 @@ def transform_reveal_event_data():
     data = etl_database.fetch_reveal_query(sql)
 
     for data_line in data:
-        #0 id, 1created_at, 2base_entity_id, 3location_id, 4event_type, 5provider_id, 6date_created, 7event_date, 8entity_type, 9task_id, 10team_id, 11server_version, 12structure_id, 13plan_id,14details
-
         sql = "INSERT INTO reveal.events (id,created_at,base_entity_id,location_id,event_type,provider_id,date_created,event_date,entity_type,task_id,team_id,server_version,structure_id,plan_id,details) VALUES ('" + str(data_line[0]) + "','" + str(data_line[1]) + "','" + str(data_line[2]) + "','" + str(data_line[3]) + "','" + str(data_line[4]) + "','" + str(data_line[5]) + "','" + str(data_line[6]) + "','" + str(data_line[7]) + "','" + str(data_line[8]) + "','" + str(data_line[9]) + "','" + str(data_line[10]) + "','" + str(data_line[11]) + "','" + str(data_line[12]) + "','" + str(data_line[13]) + "','" + json.dumps(data_line[14]).replace("'",r"''") + "') ON CONFLICT (id) DO NOTHING;"
 
         etl_database.store_reveal_query(sql)
@@ -100,15 +98,14 @@ def transform_reveal_event_data():
         sql = "UPDATE reveal.events SET form_data = '" + json.dumps(data_object[0][0]).replace("'",r"''") + "' WHERE id = '" + str(data_line[0]) + "'"
         etl_database.store_reveal_query(sql)
 
-        # print("for GCE extract this stays useful")
-        # sql = "SELECT id AS event_id, line_data ->> 'fieldCode' AS fieldCode, line_data -> 'values' ->> 0 AS response FROM ( SELECT id, jsonb_array_elements(full_json -> 'obs') AS line_data FROM reveal.raw_events WHERE (id)::text = '" + str(data_line[0]) + "') status_line;"
+        sql = "SELECT id AS event_id, line_data ->> 'fieldCode' AS fieldCode, line_data -> 'values' ->> 0 AS response FROM ( SELECT id, jsonb_array_elements(full_json -> 'obs') AS line_data FROM reveal.raw_events WHERE (id)::text = '" + str(data_line[0]) + "') status_line;"
 
-        # data_split = etl_database.fetch_reveal_query(sql)
+        data_split = etl_database.fetch_reveal_query(sql)
 
-        # for s in data_split:
-        #    sql = "INSERT INTO reveal.form_data (id,event_id,field_code,response) VALUES ('" + str(uuid.uuid4()) + "','" + str(s[0]) + "','" + str(s[1]) + "','" + str(s[2]) + "') ON CONFLICT (event_id,field_code) DO NOTHING"
+        for s in data_split:
+           sql = "INSERT INTO reveal.form_data (id,event_id,field_code,response) VALUES ('" + str(uuid.uuid4()) + "','" + str(s[0]) + "','" + str(s[1]) + "','" + str(s[2]) + "') ON CONFLICT (event_id,field_code) DO NOTHING"
 
-        #    etl_database.store_reveal_query(sql)
+           etl_database.store_reveal_query(sql)
 
 
 def transform_reveal_settings_data():

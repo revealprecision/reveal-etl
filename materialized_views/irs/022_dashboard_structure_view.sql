@@ -29,6 +29,7 @@ SELECT
     structures.sprayed_pregwomen AS sprayed_pregwomen,
     structures.sprayed_childrenU5 AS sprayed_childrenU5,
     structures.notsprayed_totalpop AS notsprayed_totalpop,
+    structures.mix_serial_numbers AS mix_serial_numbers,
     structures.event_date
 FROM reveal.irs_structures structures
 LEFT JOIN reveal.jurisdictions_tree jurisdictions ON (structures.geo_jurisdiction_id = jurisdictions.jurisdiction_id)
