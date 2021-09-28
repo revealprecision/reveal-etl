@@ -44,6 +44,14 @@ SELECT
         ELSE CAST(subq.total_all_genders as DECIMAL) / CAST(wards_population.other_population as DECIMAL)
         END AS other_pop_coverage,
     CASE
+        WHEN COALESCE(wards_population.other_population::INTEGER, 0) = 0 THEN 0
+        ELSE CAST(subq.pzq_total_treated as DECIMAL) / CAST(wards_population.other_population as DECIMAL)
+        END AS pzq_other_pop_coverage,
+    CASE
+        WHEN COALESCE(wards_population.other_population::INTEGER, 0) = 0 THEN 0
+        ELSE CAST(subq.alb_meb_total_treated as DECIMAL) / CAST(wards_population.other_population as DECIMAL)
+        END AS alb_mbz_other_pop_coverage,
+    CASE
         WHEN COALESCE(wards_population.other_pop_target_6_to_59_mos_trusted::INTEGER, 0) = 0 THEN 0
         ELSE CAST(subq.vita_total_treated as DECIMAL) / CAST(wards_population.other_pop_target_6_to_59_mos_trusted as DECIMAL)
         END AS vita_6_to_59_mos_other_pop_coverage,

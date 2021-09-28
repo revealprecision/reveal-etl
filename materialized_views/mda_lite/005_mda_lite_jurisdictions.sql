@@ -48,6 +48,14 @@ SELECT DISTINCT ON (jurisdictions_query.jurisdiction_id, plans.plan_id)
     ELSE CAST(jurisdictions_query.total_all_genders AS DECIMAL)/CAST(ward_population.other_pop_target AS DECIMAL)
     END as other_pop_coverage,
     CASE
+        WHEN COALESCE(ward_population.other_pop_target, 0) = 0 THEN 0
+        ELSE CAST(jurisdictions_query.pzq_total_treated as DECIMAL) / CAST(ward_population.other_pop_target as DECIMAL)
+        END AS pzq_other_pop_coverage,
+    CASE
+        WHEN COALESCE(ward_population.other_pop_target, 0) = 0 THEN 0
+        ELSE CAST(jurisdictions_query.alb_meb_total_treated as DECIMAL) / CAST(ward_population.other_pop_target as DECIMAL)
+        END AS alb_mbz_other_pop_coverage,
+    CASE
     WHEN COALESCE(ward_population.other_pop_target_6_to_59_mos_trusted, 0) = 0 THEN 0
     ELSE CAST(jurisdictions_query.vita_total_treated AS DECIMAL)/CAST(ward_population.other_pop_target_6_to_59_mos_trusted AS DECIMAL)
     END as vita_6_to_59_mos_other_pop_coverage,
