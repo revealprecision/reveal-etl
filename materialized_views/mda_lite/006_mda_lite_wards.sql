@@ -32,6 +32,14 @@ SELECT
         ELSE CAST(subq.total_all_genders as DECIMAL) / CAST(wards_population.official_population as DECIMAL)
         END AS treatment_coverage,
     CASE
+        WHEN COALESCE(wards_population.official_population::INTEGER, 0) = 0 THEN 0
+        ELSE CAST(subq.pzq_total_treated as DECIMAL) / CAST(wards_population.official_population as DECIMAL)
+        END AS pzq_treatment_coverage,
+    CASE
+        WHEN COALESCE(wards_population.official_population::INTEGER, 0) = 0 THEN 0
+        ELSE CAST(subq.alb_meb_total_treated as DECIMAL) / CAST(wards_population.official_population as DECIMAL)
+        END AS alb_mbz_treatment_coverage,
+    CASE
         WHEN COALESCE(wards_population.other_population::INTEGER, 0) = 0 THEN 0
         ELSE CAST(subq.total_all_genders as DECIMAL) / CAST(wards_population.other_population as DECIMAL)
         END AS other_pop_coverage,
