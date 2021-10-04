@@ -30,7 +30,6 @@ SELECT
     structures.business_status,
     not_eligible_event.form_data ->> 'eligible' AS not_eligible_reason,
     structures.plan_id AS plan_id,
-    plans.name AS plan_name,
     structures.eligible_children AS eligible_children,
     recon_event.form_data ->> 'start_time' AS drug_reconciliation_start_time,
     recon_event.form_data ->> 'end_time' AS drug_reconciliation_end_time,
@@ -40,14 +39,29 @@ SELECT
     recon_event.form_data ->> 'blisterPacketsNumber' AS blisterPacketsNumber,
     recon_event.form_data ->> 'childrenTreated' AS childrenTreated
 FROM reveal.smc_structures structures
-LEFT JOIN reveal.locations locations ON structures.structure_id = locations.id
-LEFT JOIN reveal.jurisdictions_materialized_view jurisdiction ON (structures.jurisdiction_id = jurisdiction.jurisdiction_id)
+JOIN reveal.locations locations ON structures.structure_id = locations.id
+JOIN reveal.jurisdictions_materialized_view jurisdiction ON (structures.jurisdiction_id = jurisdiction.jurisdiction_id)
 LEFT JOIN reveal.clients family ON ((structures.structure_id)::text = (family.residence)::text AND lastname = 'Family')
 LEFT JOIN reveal.clients headofhouse ON ((family.relationships -> 'family_head' ->> 0)::text = (headofhouse.baseentityid)::text)
-LEFT JOIN reveal.plans plans ON structures.plan_id = plans.identifier
-LEFT JOIN reveal.events reg_event ON ((structures.structure_id)::text = (reg_event.structure_id)::text AND reg_event.event_type = 'Family_Registration')
+LEFT JOIN reveal.events reg_event ON reg_event.base_entity_id = family.baseentityid AND reg_event.event_type = 'Family_Registration'
 LEFT JOIN reveal.events headofhouse_event ON headofhouse_event.event_type = 'Family_Member_Registration' AND headofhouse_event.base_entity_id = headofhouse.baseentityid
-LEFT JOIN reveal.events not_eligible_event ON ((structures.structure_id)::text = (not_eligible_event.structure_id)::text AND not_eligible_event.event_type = 'Family_Registration_Ineligible')
-LEFT JOIN reveal.events recon_event ON ((structures.structure_id)::text = (recon_event.structure_id)::text AND recon_event.event_type = 'mda_drug_reconciliation')
+LEFT JOIN LATERAL (
+    SELECT
+        form_data
+    FROM reveal.events
+    WHERE structures.structure_id::text = events.structure_id::text
+    AND events.event_type = 'Family_Registration_Ineligible'
+    ORDER BY event_date DESC
+    LIMIT 1
+) not_eligible_event ON TRUE
+LEFT JOIN LATERAL (
+    SELECT
+        form_data
+    FROM reveal.events
+    WHERE structures.structure_id::text = events.structure_id::text
+    AND events.event_type = 'mda_drug_reconciliation'
+    ORDER BY event_date DESC
+    LIMIT 1
+) recon_event ON TRUE
 WHERE
     structures.business_status NOT IN ('Not Visited','No Tasks');
