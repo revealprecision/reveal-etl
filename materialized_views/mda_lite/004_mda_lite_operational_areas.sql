@@ -136,6 +136,14 @@ FROM (
                  WHEN COALESCE(wards_population.official_population, 0) = 0 THEN 0
                  ELSE CAST(operational_area_query.total_all_genders as DECIMAL) / CAST(wards_population.official_population as DECIMAL)
                  END AS treatment_coverage,
+             CASE
+                 WHEN COALESCE(wards_population.official_population, 0) = 0 THEN 0
+                 ELSE CAST(operational_area_query.pzq_total_treated as DECIMAL) / CAST(wards_population.official_population as DECIMAL)
+                 END AS pzq_treatment_coverage,
+             CASE
+                 WHEN COALESCE(wards_population.official_population, 0) = 0 THEN 0
+                 ELSE CAST(operational_area_query.alb_meb_total_treated as DECIMAL) / CAST(wards_population.official_population as DECIMAL)
+                 END AS alb_mbz_treatment_coverage,
              COALESCE(wards_population.other_population, 0) AS other_pop_target,
              COALESCE(wards_population.other_pop_target_6_to_59_mos_trusted, 0) AS other_pop_target_6_to_59_mos_trusted,
              COALESCE(wards_population.other_pop_target_6_to_11_mos_trusted, 0) AS other_pop_target_6_to_11_mos_trusted,
@@ -145,6 +153,14 @@ FROM (
                  WHEN COALESCE(wards_population.other_population, 0) = 0 THEN 0
                  ELSE CAST(operational_area_query.total_all_genders as DECIMAL) / CAST(wards_population.other_population as DECIMAL)
                  END AS other_pop_coverage,
+             CASE
+                 WHEN COALESCE(wards_population.other_population, 0) = 0 THEN 0
+                 ELSE CAST(operational_area_query.pzq_total_treated as DECIMAL) / CAST(wards_population.other_population as DECIMAL)
+                 END AS pzq_other_pop_coverage,
+             CASE
+                 WHEN COALESCE(wards_population.other_population, 0) = 0 THEN 0
+                 ELSE CAST(operational_area_query.alb_meb_total_treated as DECIMAL) / CAST(wards_population.other_population as DECIMAL)
+                 END AS alb_mbz_other_pop_coverage,
              COALESCE(wards_population.census_target_population_6_to_59_mos_official, 0) AS census_target_population_6_to_59_mos_official,
              CASE
                  WHEN COALESCE(wards_population.census_target_population_6_to_59_mos_official, 0) = 0 THEN 0

@@ -32,9 +32,25 @@ SELECT
         ELSE CAST(subq.total_all_genders as DECIMAL) / CAST(wards_population.official_population as DECIMAL)
         END AS treatment_coverage,
     CASE
+        WHEN COALESCE(wards_population.official_population::INTEGER, 0) = 0 THEN 0
+        ELSE CAST(subq.pzq_total_treated as DECIMAL) / CAST(wards_population.official_population as DECIMAL)
+        END AS pzq_treatment_coverage,
+    CASE
+        WHEN COALESCE(wards_population.official_population::INTEGER, 0) = 0 THEN 0
+        ELSE CAST(subq.alb_meb_total_treated as DECIMAL) / CAST(wards_population.official_population as DECIMAL)
+        END AS alb_mbz_treatment_coverage,
+    CASE
         WHEN COALESCE(wards_population.other_population::INTEGER, 0) = 0 THEN 0
         ELSE CAST(subq.total_all_genders as DECIMAL) / CAST(wards_population.other_population as DECIMAL)
         END AS other_pop_coverage,
+    CASE
+        WHEN COALESCE(wards_population.other_population::INTEGER, 0) = 0 THEN 0
+        ELSE CAST(subq.pzq_total_treated as DECIMAL) / CAST(wards_population.other_population as DECIMAL)
+        END AS pzq_other_pop_coverage,
+    CASE
+        WHEN COALESCE(wards_population.other_population::INTEGER, 0) = 0 THEN 0
+        ELSE CAST(subq.alb_meb_total_treated as DECIMAL) / CAST(wards_population.other_population as DECIMAL)
+        END AS alb_mbz_other_pop_coverage,
     CASE
         WHEN COALESCE(wards_population.other_pop_target_6_to_59_mos_trusted::INTEGER, 0) = 0 THEN 0
         ELSE CAST(subq.vita_total_treated as DECIMAL) / CAST(wards_population.other_pop_target_6_to_59_mos_trusted as DECIMAL)
@@ -119,17 +135,17 @@ FROM (
              SUM(COALESCE (events.form_data->'treated_male_1_to_4'->>0, '0')::int) AS treated_male_1_4,
              sum(COALESCE(case when events.form_data ->> 'drugs' = 'VITA' then events.form_data ->> 'treated_male_6_to_11_mos' end,'0')::integer) as vita_treated_male_6_to_11_mos,
              sum(COALESCE((events.form_data -> 'treated_male_6_to_11_mos'::text) ->> 0, '0'::text)::integer) AS treated_male_6_to_11_mos,
-             sum(COALESCE(case when events.form_data ->> 'drugs' = 'PZQ' then events.form_data ->> 'treated_male_5_to_14' end,'0')::integer) as pzq_treated_male_5_to_14,
-             sum(COALESCE(case when events.form_data ->> 'drugs' = 'ALB' then events.form_data ->> 'treated_male_5_to_14' end,'0')::integer) as alb_treated_male_5_to_14,
-             sum(COALESCE(case when events.form_data ->> 'drugs' = 'MBZ' then events.form_data ->> 'treated_male_5_to_14' end,'0')::integer) as mbz_treated_male_5_to_14,
+             sum(COALESCE(case when events.form_data ->> 'drugs' = 'PZQ' then events.form_data ->> 'treated_male_5_to_14' end,'0')::integer) as pzq_treated_male_5_14,
+             sum(COALESCE(case when events.form_data ->> 'drugs' = 'ALB' then events.form_data ->> 'treated_male_5_to_14' end,'0')::integer) as alb_treated_male_5_14,
+             sum(COALESCE(case when events.form_data ->> 'drugs' = 'MBZ' then events.form_data ->> 'treated_male_5_to_14' end,'0')::integer) as mbz_treated_male_5_14,
              SUM(COALESCE (events.form_data->'treated_male_5_to_14'->>0, '0')::int) AS treated_male_5_14,
-             sum(COALESCE(case when events.form_data ->> 'drugs' = 'PZQ' then events.form_data ->> 'treated_female_5_to_15' end,'0')::integer) as pzq_treated_female_5_to_15,
-             sum(COALESCE(case when events.form_data ->> 'drugs' = 'ALB' then events.form_data ->> 'treated_female_5_to_15' end,'0')::integer) as alb_treated_female_5_to_15,
-             sum(COALESCE(case when events.form_data ->> 'drugs' = 'MEB' then events.form_data ->> 'treated_female_5_to_15' end,'0')::integer) as meb_treated_female_5_to_15,
+             sum(COALESCE(case when events.form_data ->> 'drugs' = 'PZQ' then events.form_data ->> 'treated_female_5_to_15' end,'0')::integer) as pzq_treated_female_5_15,
+             sum(COALESCE(case when events.form_data ->> 'drugs' = 'ALB' then events.form_data ->> 'treated_female_5_to_15' end,'0')::integer) as alb_treated_female_5_15,
+             sum(COALESCE(case when events.form_data ->> 'drugs' = 'MEB' then events.form_data ->> 'treated_female_5_to_15' end,'0')::integer) as meb_treated_female_5_15,
              sum(COALESCE((events.form_data -> 'treated_female_5_to_15'::text) ->> 0, '0'::text)::integer) AS treated_female_5_15,
-             sum(COALESCE(case when events.form_data ->> 'drugs' = 'PZQ' then events.form_data ->> 'treated_male_5_to_15' end,'0')::integer) as pzq_treated_male_5_to_15,
-             sum(COALESCE(case when events.form_data ->> 'drugs' = 'ALB' then events.form_data ->> 'treated_male_5_to_15' end,'0')::integer) as alb_treated_male_5_to_15,
-             sum(COALESCE(case when events.form_data ->> 'drugs' = 'MEB' then events.form_data ->> 'treated_male_5_to_15' end,'0')::integer) as meb_treated_male_5_to_15,
+             sum(COALESCE(case when events.form_data ->> 'drugs' = 'PZQ' then events.form_data ->> 'treated_male_5_to_15' end,'0')::integer) as pzq_treated_male_5_15,
+             sum(COALESCE(case when events.form_data ->> 'drugs' = 'ALB' then events.form_data ->> 'treated_male_5_to_15' end,'0')::integer) as alb_treated_male_5_15,
+             sum(COALESCE(case when events.form_data ->> 'drugs' = 'MEB' then events.form_data ->> 'treated_male_5_to_15' end,'0')::integer) as meb_treated_male_5_15,
              sum(COALESCE((events.form_data -> 'treated_male_5_to_15'::text) ->> 0, '0'::text)::integer) AS treated_male_5_15,
              sum(COALESCE(case when events.form_data ->> 'drugs' = 'PZQ' then events.form_data ->> 'treated_male_above_15' end,'0')::integer) as pzq_treated_male_above_15,
              sum(COALESCE(case when events.form_data ->> 'drugs' = 'ALB' then events.form_data ->> 'treated_male_above_15' end,'0')::integer) as alb_treated_male_above_15,
@@ -146,9 +162,9 @@ FROM (
              SUM(COALESCE (events.form_data->'treated_female_1_to_4'->>0, '0')::int) AS treated_female_1_4,
              sum(COALESCE(case when events.form_data ->> 'drugs' = 'VITA' then events.form_data ->> 'treated_female_6_to_11_mos' end,'0')::integer) as vita_treated_female_6_to_11_mos,
              sum(COALESCE((events.form_data -> 'treated_female_6_to_11_mos'::text) ->> 0, '0'::text)::integer) AS treated_female_6_to_11_mos,
-             sum(COALESCE(case when events.form_data ->> 'drugs' = 'PZQ' then events.form_data ->> 'treated_female_5_to_14' end,'0')::integer) as pzq_treated_female_5_to_14,
-             sum(COALESCE(case when events.form_data ->> 'drugs' = 'ALB' then events.form_data ->> 'treated_female_5_to_14' end,'0')::integer) as alb_treated_female_5_to_14,
-             sum(COALESCE(case when events.form_data ->> 'drugs' = 'MBZ' then events.form_data ->> 'treated_female_5_to_14' end,'0')::integer) as mbz_treated_female_5_to_14,
+             sum(COALESCE(case when events.form_data ->> 'drugs' = 'PZQ' then events.form_data ->> 'treated_female_5_to_14' end,'0')::integer) as pzq_treated_female_5_14,
+             sum(COALESCE(case when events.form_data ->> 'drugs' = 'ALB' then events.form_data ->> 'treated_female_5_to_14' end,'0')::integer) as alb_treated_female_5_14,
+             sum(COALESCE(case when events.form_data ->> 'drugs' = 'MBZ' then events.form_data ->> 'treated_female_5_to_14' end,'0')::integer) as mbz_treated_female_5_14,
              SUM(COALESCE (events.form_data->'treated_female_5_to_14'->>0, '0')::int) AS treated_female_5_14,
              sum(COALESCE(case when events.form_data ->> 'drugs' = 'PZQ' then events.form_data ->> 'treated_female_above_15' end,'0')::integer) as pzq_treated_female_above_15,
              sum(COALESCE(case when events.form_data ->> 'drugs' = 'ALB' then events.form_data ->> 'treated_female_above_15' end,'0')::integer) as alb_treated_female_above_15,
