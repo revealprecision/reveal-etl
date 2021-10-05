@@ -64,6 +64,7 @@ FROM (
                 AND (smc_structures.business_status <> ALL (ARRAY['Not Eligible'::text,'No Tasks'::text]))
                 AND (((plans.identifier)::text = (smc_structures.plan_id)::text) OR (smc_structures.plan_id IS NULL))
             )
+            LIMIT 1
         ) smc_structures_query ON (true))
         LEFT JOIN LATERAL (
             SELECT

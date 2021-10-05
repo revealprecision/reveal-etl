@@ -21,7 +21,7 @@ SELECT
     COALESCE(events_query_1.event_date, events_query_2.event_date) AS event_date,
     CASE WHEN (events_query_2.business_status = 'Family Registered' AND events_query_3.eligible_children = 0) THEN 'Ineligible'
         WHEN (events_query_2.business_status = 'Not Visited' AND events_query_1.found_structures = 1) THEN 'Ineligible'
-        WHEN (tasks_query.business_status <> 'Not Visited' AND events_query_1.event_id IS NOT NULL AND events_query_2.business_status IS NULL) THEN 'Family Registered'
+        WHEN (tasks_query.business_status <> 'Not Visited' AND events_query_1.event_id IS NOT NULL AND events_query_2.business_status IS NULL) THEN 'Ineligible'
         WHEN (tasks_query.business_status <> 'Not Visited') THEN tasks_query.business_status
         WHEN (tasks_query.business_status is NULL) THEN 'No Tasks'
         ELSE COALESCE(events_query_2.business_status,'Not Visited') END AS business_status,
@@ -43,7 +43,7 @@ LEFT JOIN LATERAL (
         events.event_date,
         tasks.plan_identifier AS plan_id,
         tasks.status AS task_status,
-        events.form_data ->> 'business_status',
+        events.form_data ->> 'business_status' AS business_status,
         CASE WHEN ((events.event_type)::text = ANY (ARRAY['Family_Registration'::text, 'Register_Structure'::text])) THEN 1 ELSE 0 END AS found_structures
     FROM
     (
@@ -79,7 +79,8 @@ LEFT JOIN LATERAL (
             WHEN (events.event_type = 'mda_dispense' AND events.form_data ->> 'business_status' = 'Ineligible') THEN 51
             WHEN (events.event_type = 'mda_dispense' AND events.form_data ->> 'business_status' = 'SMC Complete') THEN 50
 
-            WHEN (events.event_type = 'Family_Member_Registration' AND events.form_data ->> 'business_status' = 'Family Registered') THEN 3
+            WHEN (events.event_type = 'Family_Member_Registration' AND events.form_data ->> 'business_status' = 'Family Registered') THEN 4
+            WHEN (events.event_type = 'Family_Member_Registration' AND events.form_data ->> 'business_status' IS NULL) THEN 3
             WHEN (events.event_type = 'Family_Member_Registration' AND events.form_data ->> 'business_status' = 'Not Visited') THEN 2
             WHEN (events.event_type = 'Family_Registration' AND events.form_data ->> 'business_status' = 'Not Visited') THEN 1
             ELSE 0 END DESC
@@ -120,7 +121,7 @@ LEFT JOIN LATERAL (
 ) events_query_3 ON (true)
 LEFT JOIN LATERAL (
     SELECT
-        COALESCE(COUNT(events.form_data ->> 'business_status'),0) AS treated_children
+        COALESCE(COUNT(DISTINCT(events.base_entity_id)),0) AS treated_children
     FROM events
     WHERE events.event_type in ('mda_dispense')
     AND events.form_data ->> 'business_status' = 'SMC Complete'
