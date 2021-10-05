@@ -43,7 +43,7 @@ SELECT
         WHEN (individual.birthdateapprox = 't' AND COALESCE(individual.attributes ->> 'age_entered', 0::text)::numeric < 1) THEN '3to12 mnth'
         WHEN (individual.birthdateapprox = 't' AND COALESCE(individual.attributes ->> 'age_entered', 0::text)::numeric = 1 AND reg_event.form_data ->> 'job_aid' = 'threeToTwelve') THEN '3to12 mnth'
         WHEN (individual.birthdateapprox = 't' AND COALESCE(individual.attributes ->> 'age_entered', 0::text)::numeric >= 1 AND COALESCE(individual.attributes ->> 'age_entered', 0::text)::numeric < 6) THEN '12to59 mnth'
-        WHEN (individual.birthdateapprox = 't' AND COALESCE(individual.attributes ->> 'age_entered', 0::text)::numeric > 5) THEN '<60 mnth'
+        WHEN (individual.birthdateapprox = 't' AND COALESCE(individual.attributes ->> 'age_entered', 0::text)::numeric > 5) THEN '>60 mnth'
         ELSE 'unknown'
     END AS age_category,
     individual.attributes ->> 'residence' AS structure_id,
