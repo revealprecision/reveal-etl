@@ -94,7 +94,10 @@ FROM (
                                 events.event_date,
                                 tasks.plan_identifier AS plan_id,
                                 tasks.status AS task_status,
-                                COALESCE(form_data ->> 'location_zone', ''::text) AS village_name,
+                                CASE
+                                    WHEN form_data ->> 'location_zone' = 'other' THEN COALESCE(form_data ->> 'location_other', 'other_not_specified'::text)
+                                    ELSE COALESCE(form_data ->> 'location_zone', ''::text)
+                                END AS village_name,
                                 (COALESCE(((events.form_data -> 'rooms_eligible'::text) ->> 0), '0'::text))::integer AS rooms_eligible,
                                 (COALESCE(((events.form_data -> 'rooms_sprayed'::text) ->> 0), '0'::text))::integer AS rooms_sprayed,
                                 COALESCE(((events.form_data -> 'eligibility'::text) ->> 0), 'Eligible'::text) AS eligibility,
