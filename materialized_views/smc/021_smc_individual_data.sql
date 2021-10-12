@@ -34,6 +34,18 @@ SELECT
        ELSE 'False' END AS birth_date_approx,
     COALESCE(individual.attributes ->> 'age_entered', reg_event.form_data ->> 'job_aid') AS age_entered,
     reg_event.form_data ->> 'job_aid' AS unkown_selection,
+    CASE
+        WHEN (individual.birthdateapprox = 'f' AND (individual.birthdate + INTERVAL '3 month') > NOW()) THEN '<3 mnth'
+        WHEN (individual.birthdateapprox = 'f' AND (individual.birthdate + INTERVAL '1 year') > NOW()) THEN '3to12 mnth'
+        WHEN (individual.birthdateapprox = 'f' AND (individual.birthdate + INTERVAL '5 year') > NOW()) THEN '12to59 mnth'
+        WHEN (individual.birthdateapprox = 'f' AND (individual.birthdate + INTERVAL '5 year') < NOW()) THEN '>60 mnth'
+
+        WHEN (individual.birthdateapprox = 't' AND COALESCE(individual.attributes ->> 'age_entered', 0::text)::numeric < 1) THEN '3to12 mnth'
+        WHEN (individual.birthdateapprox = 't' AND COALESCE(individual.attributes ->> 'age_entered', 0::text)::numeric = 1 AND reg_event.form_data ->> 'job_aid' = 'threeToTwelve') THEN '3to12 mnth'
+        WHEN (individual.birthdateapprox = 't' AND COALESCE(individual.attributes ->> 'age_entered', 0::text)::numeric >= 1 AND COALESCE(individual.attributes ->> 'age_entered', 0::text)::numeric < 6) THEN '12to59 mnth'
+        WHEN (individual.birthdateapprox = 't' AND COALESCE(individual.attributes ->> 'age_entered', 0::text)::numeric > 5) THEN '>60 mnth'
+        ELSE 'unknown'
+    END AS age_category,
     individual.attributes ->> 'residence' AS structure_id,
     CASE WHEN family.relationships -> 'family_head' ->> 0 = individual.baseentityid THEN 'parent'
         ELSE 'child' END AS individual_type,
