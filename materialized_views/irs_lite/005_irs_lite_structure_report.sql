@@ -20,6 +20,7 @@ FROM (
         task_id,
         plan_id,
         business_status,
+        structure_name,
         geometry
     FROM
         irs_lite_structures
