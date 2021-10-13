@@ -68,7 +68,7 @@ LEFT JOIN LATERAL (
         key as structure_id,
         COALESCE(data ->> 0, '0')::INTEGER as target_flag
     FROM opensrp_settings
-    WHERE identifier = 'jurisdiction_metadata-target'
+    WHERE identifier = irs_lite_plans.plan_id
     AND locations.id = opensrp_settings.key
     LIMIT 1
 ) AS structure_setting_target ON true
