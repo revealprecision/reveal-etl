@@ -73,8 +73,8 @@ FROM (
         health_center_jurisdictions.name AS health_center_jurisdiction_name,
         irs_structures.totstruct,
         CASE
-            WHEN foundstruct > 0 THEN irs_structures.targstruct
-            ELSE operational_target.target
+            WHEN COALESCE(operational_target.target,0::numeric) > 0 THEN irs_structures.totstruct
+            ELSE 0::numeric
         END AS targstruct,
         irs_structures.rooms_eligible,
         irs_structures.rooms_sprayed,

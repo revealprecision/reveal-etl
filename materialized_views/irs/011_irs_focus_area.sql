@@ -48,5 +48,4 @@ SELECT
     irs_focus_area_base.latest_sa_event_date,
     irs_focus_area_base.rooms_on_ground
 FROM irs_focus_area_base
-WHERE irs_focus_area_base.is_leaf_node = true
-AND targstruct > 0;
+WHERE irs_focus_area_base.is_leaf_node = true;

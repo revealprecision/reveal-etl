@@ -21,7 +21,8 @@ SELECT DISTINCT ON (locations.id, events_query.task_id)
     events_query.plan_id AS plan_id,
     events_query.event_date AS event_date,
     COALESCE(events_query.business_status, 'Not Visited') AS business_status,
-    COALESCE(structure_setting_query.totStruct, '0') AS totStruct
+    COALESCE(structure_setting_count.totStruct, '0') AS totStruct,
+    COALESCE(structure_setting_target.target_flag, '0') AS target_flag
 FROM locations
 JOIN plan_jurisdiction ON locations.jurisdiction_id = plan_jurisdiction.jurisdiction_id
 JOIN irs_lite_plans ON plan_jurisdiction.plan_id = irs_lite_plans.plan_id
@@ -61,7 +62,16 @@ LEFT JOIN LATERAL (
     WHERE identifier = 'jurisdiction_metadata-structures'
     AND locations.id = opensrp_settings.key
     LIMIT 1
-) AS structure_setting_query ON true
+) AS structure_setting_count ON true
+LEFT JOIN LATERAL (
+    SELECT
+        key as structure_id,
+        COALESCE(data ->> 0, '0')::INTEGER as target_flag
+    FROM opensrp_settings
+    WHERE identifier = 'jurisdiction_metadata-target'
+    AND locations.id = opensrp_settings.key
+    LIMIT 1
+) AS structure_setting_target ON true
 WHERE locations.status != 'Inactive'
 AND locations.geographic_level = 4;
 
