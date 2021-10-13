@@ -105,8 +105,8 @@ FROM (
         irs_structures.latest_spray_event_date,
         coverage_query.spraycov,
         CASE
-            WHEN (irs_structures.totstruct = 0) THEN (0)::numeric
-            ELSE ((irs_structures.foundstruct)::numeric / (irs_structures.totstruct)::numeric)
+            WHEN (irs_structures.targstruct = 0) THEN (0)::numeric
+            ELSE ((irs_structures.foundstruct)::numeric / (irs_structures.targstruct)::numeric)
         END AS spraytarg,
         CASE
             WHEN (irs_structures.foundstruct = 0) THEN (0)::numeric

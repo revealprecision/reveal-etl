@@ -57,7 +57,7 @@ FROM (
             SELECT
                 structures.plan_id,
                 structures.jurisdiction_id,
-                COALESCE(COUNT(structures.structure_id) , 0) AS targAreas,
+                COALESCE(COUNT(structures.structure_id) FILTER (WHERE structures.target_flag = 1), 0) AS targAreas,
                 COALESCE(COUNT(structures.structure_id) FILTER (WHERE structures.task_status = 'Completed') , 0) AS visitedAreas,
                 COALESCE(SUM(structures.totStruct), 0) AS totStruct,
                 COALESCE(SUM(structures.totStruct) FILTER (WHERE structures.target_flag = 1), 0) AS targStruct
@@ -92,16 +92,6 @@ FROM (
         WHERE operational_area_query.jurisdiction_id = locations.jurisdiction_id
         AND locations.geographic_level = 4
     ) AS totAreas_query ON true
-    -- LEFT JOIN LATERAL (
-    --     SELECT
-    --         key as jurisdiction_id,
-    --         COALESCE(data ->> 0, '0')::INTEGER as target
-    --     FROM opensrp_settings
-    --     WHERE identifier = 'jurisdiction_metadata-target'
-    --     AND operational_area_query.jurisdiction_id = opensrp_settings.key
-    --     ORDER BY COALESCE(data->>'serverVersion', '0')::BIGINT DESC
-    --     LIMIT 1
-    -- ) AS jurisdiction_target_query ON true
     WHERE plans.intervention_type IN ('IRS-Lite') AND plans.status NOT IN ('draft', 'retired')
 ) AS main_query;
 
