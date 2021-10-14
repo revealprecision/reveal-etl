@@ -40,7 +40,7 @@ FROM (
         operational_area_query.found,
         operational_area_query.sprayed,
         COALESCE(operational_area_query.totStruct, 0) AS totStruct,
-        COALESCE(jurisdiction_target_query.target, 0) AS targStruct,
+        COALESCE(operational_area_query.targStruct, 0) AS targStruct,
         COALESCE(totAreas_query.totAreas, 0) AS totAreas
     FROM plans
     LEFT JOIN (
@@ -50,15 +50,17 @@ FROM (
             sum(jurisdictions.targAreas) AS targAreas,
             sum(jurisdictions.visitedAreas) AS visitedAreas,
             sum(jurisdictions.totStruct) AS totStruct,
+            sum(jurisdictions.targStruct) AS targStruct,
             COALESCE(sum(daily_summary.daily_found), 0) AS found,
             COALESCE(sum(daily_summary.daily_sprayed), 0) AS sprayed
         FROM (
             SELECT
                 structures.plan_id,
                 structures.jurisdiction_id,
-                COALESCE(COUNT(structures.structure_id) , 0) AS targAreas,
+                COALESCE(COUNT(structures.structure_id) FILTER (WHERE structures.target_flag = 1), 0) AS targAreas,
                 COALESCE(COUNT(structures.structure_id) FILTER (WHERE structures.task_status = 'Completed') , 0) AS visitedAreas,
-                COALESCE(SUM(structures.totStruct), 0) AS totStruct
+                COALESCE(SUM(structures.totStruct), 0) AS totStruct,
+                COALESCE(SUM(structures.totStruct) FILTER (WHERE structures.target_flag = 1), 0) AS targStruct
             FROM irs_lite_structures AS structures
             WHERE structures.plan_id IS NOT NULL
             GROUP BY structures.plan_id, structures.jurisdiction_id
@@ -90,16 +92,6 @@ FROM (
         WHERE operational_area_query.jurisdiction_id = locations.jurisdiction_id
         AND locations.geographic_level = 4
     ) AS totAreas_query ON true
-    LEFT JOIN LATERAL (
-        SELECT
-            key as jurisdiction_id,
-            COALESCE(data ->> 0, '0')::INTEGER as target
-        FROM opensrp_settings
-        WHERE identifier = 'jurisdiction_metadata-target'
-        AND operational_area_query.jurisdiction_id = opensrp_settings.key
-        ORDER BY COALESCE(data->>'serverVersion', '0')::BIGINT DESC
-        LIMIT 1
-    ) AS jurisdiction_target_query ON true
     WHERE plans.intervention_type IN ('IRS-Lite') AND plans.status NOT IN ('draft', 'retired')
 ) AS main_query;
 

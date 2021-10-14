@@ -122,12 +122,12 @@ FROM (
                         ELSE ((irs_focus_area_base_query.spraycovhigh)::numeric / (irs_focus_area_base_query.spraycovabovemin)::numeric)
                     END AS perctvisareaseffect,
                     CASE
-                        WHEN (irs_focus_area_base_query.totstruct = (0)::numeric) THEN (0)::numeric
-                        ELSE (irs_focus_area_base_query.sprayedstruct / irs_focus_area_base_query.totstruct)
+                        WHEN (irs_focus_area_base_query.targstruct = (0)::numeric) THEN (0)::numeric
+                        ELSE (irs_focus_area_base_query.sprayedstruct / irs_focus_area_base_query.targstruct)
                     END AS spraycovtarg,
                     CASE
-                        WHEN (irs_focus_area_base_query.totstruct = (0)::numeric) THEN (0)::numeric
-                        ELSE (irs_focus_area_base_query.foundstruct / irs_focus_area_base_query.totstruct)
+                        WHEN (irs_focus_area_base_query.targstruct = (0)::numeric) THEN (0)::numeric
+                        ELSE (irs_focus_area_base_query.foundstruct / irs_focus_area_base_query.targstruct)
                     END AS foundcoverage,
                     CASE
                         WHEN (irs_focus_area_base_query.foundstruct = (0)::numeric) THEN (0)::numeric
