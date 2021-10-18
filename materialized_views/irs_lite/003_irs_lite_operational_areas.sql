@@ -39,8 +39,8 @@ FROM (
         operational_area_query.visitedAreas,
         operational_area_query.found,
         operational_area_query.sprayed,
-        COALESCE(operational_area_query.totStruct, 0) AS totStruct,
-        COALESCE(operational_area_query.targStruct, 0) AS targStruct,
+        COALESCE(operational_area_query.totStruct + jurisdiction_total_query.area_additional_total, 0) AS totStruct,
+        COALESCE(operational_area_query.targStruct + jurisdiction_target_query.area_additional_target, 0) AS targStruct,
         COALESCE(totAreas_query.totAreas, 0) AS totAreas
     FROM plans
     LEFT JOIN (
@@ -92,6 +92,26 @@ FROM (
         WHERE operational_area_query.jurisdiction_id = locations.jurisdiction_id
         AND locations.geographic_level = 4
     ) AS totAreas_query ON true
+    LEFT JOIN LATERAL (
+        SELECT
+            key as jurisdiction_id,
+            COALESCE(data ->> 0, '0')::INTEGER as area_additional_total
+        FROM opensrp_settings
+        WHERE identifier = 'irs_lite_operational_area_total_under_5'
+        AND operational_area_query.jurisdiction_id = opensrp_settings.key
+        ORDER BY COALESCE(data->>'serverVersion', '0')::BIGINT DESC
+        LIMIT 1
+    ) AS jurisdiction_total_query ON true
+    LEFT JOIN LATERAL (
+        SELECT
+            key as jurisdiction_id,
+            COALESCE(data ->> 0, '0')::INTEGER as area_additional_target
+        FROM opensrp_settings
+        WHERE identifier = 'irs_lite_operational_area_target_under_5'
+        AND operational_area_query.jurisdiction_id = opensrp_settings.key
+        ORDER BY COALESCE(data->>'serverVersion', '0')::BIGINT DESC
+        LIMIT 1
+    ) AS jurisdiction_target_query ON true
     WHERE plans.intervention_type IN ('IRS-Lite') AND plans.status NOT IN ('draft', 'retired')
 ) AS main_query;
 
