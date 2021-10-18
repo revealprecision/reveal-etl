@@ -116,7 +116,7 @@ FROM (
             WHEN (irs_structures.totstruct = 0) THEN NULL::numeric
             ELSE ((irs_structures.sprayedstruct)::numeric / (irs_structures.totstruct)::numeric)
         END AS spray_effectiveness,
-        GREATEST((0)::numeric, ceil((((irs_structures.totstruct)::numeric * 0.9) - (irs_structures.sprayedstruct)::numeric))) AS structures_remaining_to_90_se,
+        GREATEST((0)::numeric, ceil((((irs_structures.totstruct)::numeric * 0.895) - (irs_structures.sprayedstruct)::numeric))) AS structures_remaining_to_90_se,
         (GREATEST((0)::numeric, (((irs_structures.totstruct)::numeric * 0.9) - (irs_structures.sprayedstruct)::numeric)) / 15.0) AS tla_days_to_90_se,
             CASE
                 WHEN (irs_structures.sprayed_rooms_eligible = 0) THEN (0)::numeric
