@@ -41,6 +41,10 @@ SELECT
     COALESCE(events_query.business_status, (tasks_query.business_status)::text, 'No Tasks'::text) AS business_status,
     COALESCE(events_query.sprayed_values, (ARRAY[]::character varying[])::text[]) AS sprayed_values,
     COALESCE(events_query.notsprayed_reasons, (ARRAY[]::character varying[])::text[]) AS notsprayed_reasons,
+    COALESCE(events_query.rooms_notsprayed_reasons, ''::text) AS rooms_notsprayed_reasons,
+    COALESCE(events_query.sprayop_code, ''::text) AS sprayop_code,
+    COALESCE(events_query.compoundheadstructure, ''::text) AS compoundheadstructure,
+    COALESCE(events_query.compoundheadname, ''::text) AS compoundheadname,
     COALESCE(events_query.mix_serial_numbers, 0) AS mix_serial_numbers,
     COALESCE(events_query.duplicate, false) AS duplicate,
     COALESCE(events_query.sprayed_duplicate, false) AS sprayed_duplicate
@@ -85,6 +89,10 @@ FROM (
 
                             array_agg(subq.structure_sprayed) OVER (PARTITION BY subq.structure_sprayed) AS sprayed_values,
                             array_agg(subq.notsprayed_reason) FILTER (WHERE (subq.notsprayed_reason <> ''::text)) OVER (PARTITION BY subq.notsprayed_reason) AS notsprayed_reasons,
+                            subq.rooms_notsprayed_reasons AS rooms_notsprayed_reasons,
+                            subq.sprayop_code,
+                            subq.compoundheadstructure,
+                            subq.compoundheadname,
                             (array_length(array_agg(subq.structure_sprayed) OVER (PARTITION BY subq.structure_sprayed), 1) > 1) AS duplicate,
                             (('yes'::text = ANY (array_agg(subq.structure_sprayed) OVER (PARTITION BY subq.structure_sprayed))) AND (array_length(array_agg(subq.structure_sprayed) OVER (PARTITION BY subq.structure_sprayed), 1) > 1)) AS sprayed_duplicate
                         FROM (
@@ -118,6 +126,10 @@ FROM (
                                 COALESCE((events.form_data ->> 'notsprayed_pregwomen')::text, '0'::text)::integer AS notsprayed_pregwomen,
                                 COALESCE((events.form_data ->> 'notsprayed_childrenU5')::text, '0'::text)::integer AS notsprayed_childrenU5,
                                 COALESCE(((events.form_data -> 'notsprayed_reason'::text) ->> 0), ''::text) AS notsprayed_reason,
+                                COALESCE(notsprayed_reason_query.rooms_notsprayed_reasons, ''::text) AS rooms_notsprayed_reasons,
+                                COALESCE(((events.form_data -> 'sprayop_code'::text) ->> 0), ''::text) AS sprayop_code,
+                                COALESCE(((events.form_data -> 'compoundheadstructure'::text) ->> 0), ''::text) AS compoundheadstructure,
+                                COALESCE(((events.form_data -> 'compoundheadname'::text) ->> 0), ''::text) AS compoundheadname,
                                 COALESCE(mix_serial_numbers_query.mix_serial_numbers::text, '0')::integer AS mix_serial_numbers
                             FROM (reveal.events
                             LEFT JOIN reveal.tasks ON (((tasks.identifier)::text = (events.task_id)::text)))
@@ -132,6 +144,14 @@ FROM (
                                 AND response NOT LIKE '%openmrs%'
                                 GROUP BY event_id
                             ) mix_serial_numbers_query ON TRUE
+                            LEFT JOIN LATERAL (
+                                SELECT
+                                    string_agg(response::text, ',') AS rooms_notsprayed_reasons
+                                FROM
+                                    reveal.form_data
+                                WHERE form_data.event_id = events.id
+                                AND field_code LIKE 'partiallysprayed_reason_%'
+                            ) notsprayed_reason_query ON TRUE
                             WHERE (((locations.id)::text = (events.base_entity_id)::text)
                             AND ((events.entity_type)::text = 'Structure'::text)
                             AND ((events.event_type)::text = 'Spray'::text)
