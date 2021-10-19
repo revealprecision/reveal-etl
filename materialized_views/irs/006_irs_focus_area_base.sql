@@ -117,7 +117,7 @@ FROM (
             ELSE ((irs_structures.sprayedstruct)::numeric / (irs_structures.totstruct)::numeric)
         END AS spray_effectiveness,
         GREATEST((0)::numeric, ceil((((irs_structures.totstruct)::numeric * 0.895) - (irs_structures.sprayedstruct)::numeric))) AS structures_remaining_to_90_se,
-        (GREATEST((0)::numeric, (((irs_structures.totstruct)::numeric * 0.9) - (irs_structures.sprayedstruct)::numeric)) / 15.0) AS tla_days_to_90_se,
+        (GREATEST((0)::numeric, (((irs_structures.totstruct)::numeric * 0.895) - (irs_structures.sprayedstruct)::numeric)) / 15.0) AS tla_days_to_90_se,
             CASE
                 WHEN (irs_structures.sprayed_rooms_eligible = 0) THEN (0)::numeric
                 ELSE ((irs_structures.sprayed_rooms_sprayed)::numeric / (irs_structures.sprayed_rooms_eligible)::numeric)
@@ -127,7 +127,7 @@ FROM (
              ELSE ((irs_structures.sprayed_rooms_eligible)::numeric / (irs_structures.foundstruct)::numeric)
             END AS rooms_on_ground,
             CASE
-                WHEN (coverage_query.spraycov >= 0.9) THEN '0'::text
+                WHEN (coverage_query.spraycov >= 0.895) THEN '0'::text
                 WHEN (irs_sa_events.latest_event_id IS NOT NULL) THEN 'Reviewed with decision'::text
                 WHEN (coverage_query.spraycov = (0)::numeric) THEN 'n/a'::text
                 ELSE 'Not done'::text
