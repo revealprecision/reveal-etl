@@ -24,49 +24,57 @@ SELECT DISTINCT ON (jurisdictions_query.jurisdiction_id, plans.plan_id)
     COALESCE(ward_population.other_pop_target_5_to_15_trusted, 0) AS other_pop_target_5_to_15_trusted,
     (COALESCE(ward_population.census_pop_target_5_to_15_official, 0) + COALESCE(ward_population.census_pop_target_above_16_official, 0)) AS census_pop_target_5_to_15_and_above_16_official,
     CASE
-    WHEN (COALESCE(ward_population.census_pop_target_5_to_15_official, 0) + COALESCE(ward_population.census_pop_target_above_16_official, 0)) = 0 THEN 0
-    ELSE CAST(jurisdictions_query.pzq_total_treated as DECIMAL) / CAST((COALESCE(ward_population.census_pop_target_5_to_15_official, 0) + COALESCE(ward_population.census_pop_target_above_16_official, 0)) as DECIMAL)
-    END AS pzq_5_years_and_above_16_treatment_coverage,
+        WHEN (COALESCE(ward_population.census_pop_target_5_to_15_official, 0) + COALESCE(ward_population.census_pop_target_above_16_official, 0)) = 0 THEN 0
+        ELSE CAST(jurisdictions_query.pzq_total_treated as DECIMAL) / CAST((COALESCE(ward_population.census_pop_target_5_to_15_official, 0) + COALESCE(ward_population.census_pop_target_above_16_official, 0)) as DECIMAL)
+        END AS pzq_5_years_and_above_16_treatment_coverage,
     CASE
-    WHEN COALESCE(ward_population.census_target_population_6_to_59_mos_official, 0) = 0 THEN 0
-    ELSE CAST(jurisdictions_query.vita_total_treated AS DECIMAL)/CAST(ward_population.census_target_population_6_to_59_mos_official AS DECIMAL)
-    END as vita_6_to_59_mos_treatment_coverage,
+        WHEN COALESCE(ward_population.census_target_population_6_to_59_mos_official, 0) = 0 THEN 0
+        ELSE CAST(jurisdictions_query.vita_total_treated AS DECIMAL)/CAST(ward_population.census_target_population_6_to_59_mos_official AS DECIMAL)
+        END as vita_6_to_59_mos_treatment_coverage,
     CASE
-    WHEN COALESCE(ward_population.official_population, 0) = 0 THEN 0
-    ELSE CAST(jurisdictions_query.total_all_genders AS DECIMAL)/CAST(ward_population.official_population AS DECIMAL)
-    END as treatment_coverage,
+        WHEN COALESCE(ward_population.official_population, 0) = 0 THEN 0
+        ELSE CAST(jurisdictions_query.total_all_genders AS DECIMAL)/CAST(ward_population.official_population AS DECIMAL)
+        END as treatment_coverage,
     CASE
         WHEN COALESCE(ward_population.official_population, 0) = 0 THEN 0
         ELSE CAST(jurisdictions_query.pzq_total_treated as DECIMAL) / CAST(ward_population.official_population as DECIMAL)
         END AS pzq_treatment_coverage,
     CASE
         WHEN COALESCE(ward_population.official_population, 0) = 0 THEN 0
-        ELSE CAST(jurisdictions_query.alb_meb_total_treated as DECIMAL) / CAST(ward_population.official_population as DECIMAL)
-        END AS alb_mbz_treatment_coverage,
+        ELSE CAST(jurisdictions_query.alb_total_treated as DECIMAL) / CAST(ward_population.official_population as DECIMAL)
+        END AS alb_treatment_coverage,
+    CASE
+        WHEN COALESCE(ward_population.official_population, 0) = 0 THEN 0
+        ELSE CAST(jurisdictions_query.meb_total_treated as DECIMAL) / CAST(ward_population.official_population as DECIMAL)
+        END AS mbz_treatment_coverage,
     CASE
     WHEN COALESCE(ward_population.other_pop_target, 0) = 0 THEN 0
-    ELSE CAST(jurisdictions_query.total_all_genders AS DECIMAL)/CAST(ward_population.other_pop_target AS DECIMAL)
-    END as other_pop_coverage,
+        ELSE CAST(jurisdictions_query.total_all_genders AS DECIMAL)/CAST(ward_population.other_pop_target AS DECIMAL)
+        END as other_pop_coverage,
     CASE
         WHEN COALESCE(ward_population.other_pop_target, 0) = 0 THEN 0
         ELSE CAST(jurisdictions_query.pzq_total_treated as DECIMAL) / CAST(ward_population.other_pop_target as DECIMAL)
         END AS pzq_other_pop_coverage,
     CASE
         WHEN COALESCE(ward_population.other_pop_target, 0) = 0 THEN 0
-        ELSE CAST(jurisdictions_query.alb_meb_total_treated as DECIMAL) / CAST(ward_population.other_pop_target as DECIMAL)
-        END AS alb_mbz_other_pop_coverage,
+        ELSE CAST(jurisdictions_query.alb_total_treated as DECIMAL) / CAST(ward_population.other_pop_target as DECIMAL)
+        END AS alb_other_pop_coverage,
     CASE
-    WHEN COALESCE(ward_population.other_pop_target_6_to_59_mos_trusted, 0) = 0 THEN 0
-    ELSE CAST(jurisdictions_query.vita_total_treated AS DECIMAL)/CAST(ward_population.other_pop_target_6_to_59_mos_trusted AS DECIMAL)
-    END as vita_6_to_59_mos_other_pop_coverage,
+        WHEN COALESCE(ward_population.other_pop_target, 0) = 0 THEN 0
+        ELSE CAST(jurisdictions_query.meb_total_treated as DECIMAL) / CAST(ward_population.other_pop_target as DECIMAL)
+        END AS mbz_other_pop_coverage,
+    CASE
+        WHEN COALESCE(ward_population.other_pop_target_6_to_59_mos_trusted, 0) = 0 THEN 0
+        ELSE CAST(jurisdictions_query.vita_total_treated AS DECIMAL)/CAST(ward_population.other_pop_target_6_to_59_mos_trusted AS DECIMAL)
+        END as vita_6_to_59_mos_other_pop_coverage,
     CASE
         WHEN COALESCE(ward_population.other_pop_target_6_to_11_mos_trusted, 0) = 0 THEN 0
         ELSE CAST(jurisdictions_query.vita_total_treated_6_to_11_mos AS DECIMAL)/CAST(ward_population.other_pop_target_6_to_11_mos_trusted AS DECIMAL)
         END as vita_6_to_11_mos_other_pop_coverage,
     CASE
-    WHEN COALESCE(ward_population.census_target_population_6_to_11_mos_official, 0) = 0 THEN 0
-    ELSE CAST(jurisdictions_query.vita_total_treated_6_to_11_mos AS DECIMAL)/CAST(ward_population.census_target_population_6_to_11_mos_official AS DECIMAL)
-    END as vita_6_to_11_mos_treatment_coverage,
+        WHEN COALESCE(ward_population.census_target_population_6_to_11_mos_official, 0) = 0 THEN 0
+        ELSE CAST(jurisdictions_query.vita_total_treated_6_to_11_mos AS DECIMAL)/CAST(ward_population.census_target_population_6_to_11_mos_official AS DECIMAL)
+        END as vita_6_to_11_mos_treatment_coverage,
     CASE
         WHEN COALESCE(ward_population.census_target_population_12_to_59_mos_official, 0) = 0 THEN 0
         ELSE CAST(jurisdictions_query.vita_total_treated_1_4 AS DECIMAL)/CAST(ward_population.census_target_population_12_to_59_mos_official AS DECIMAL)
