@@ -25,7 +25,7 @@ FROM
             jurisdictions_query.totAreas AS totAreas,
             jurisdictions_query.targAreas AS targAreas,
             jurisdictions_query.visitedAreas AS visitedAreas,
-            jurisdictions_query.sprayCovTarg AS sprayCov,
+            jurisdictions_query.sprayCov AS sprayCov,
             jurisdictions_query.sprayCovTarg AS sprayCovTarg,
             jurisdictions_query.foundCoverage AS foundCoverage,
             jurisdictions_query.spraySuccess AS spraySuccess
