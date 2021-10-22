@@ -36,9 +36,7 @@ SELECT
     irs_focus_area_base.notsprayed_pregwomen,
     irs_focus_area_base.notsprayed_childrenU5
 FROM irs_focus_area_base irs_focus_area_base
-LEFT JOIN reveal.plans plans ON irs_focus_area_base.plan_id = plans.identifier
-WHERE
-    targstruct > 0;
+LEFT JOIN reveal.plans plans ON irs_focus_area_base.plan_id = plans.identifier;
 
 CREATE INDEX IF NOT EXISTS dashboard_area_view_plan_id_idx ON dashboard_area_view (plan_id);
 CREATE INDEX IF NOT EXISTS dashboard_area_view_jurisdiction_id_idx ON dashboard_area_view (jurisdiction_id);
