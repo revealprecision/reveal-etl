@@ -67,19 +67,21 @@ FROM (
         ) AS jurisdictions
         LEFT JOIN LATERAL (
             SELECT
-            subq.daily_sprayed AS daily_sprayed,
-            subq.daily_found AS daily_found
+                COALESCE(SUM(subq.daily_sprayed),0) AS daily_sprayed,
+                COALESCE(SUM(subq.daily_found),0) AS daily_found
             FROM (
                 SELECT
-                    SUM(COALESCE (events.form_data -> 'sprayed' ->> 0, '0')::int) AS daily_sprayed,
-                    SUM(COALESCE (events.form_data -> 'found' ->> 0, '0')::int) AS daily_found
+                    DISTINCT events.location_id, events.form_data ->> 'collection_date' AS collection_date, form_data ->> 'supervisor' AS supervisor,
+                    COALESCE (events.form_data -> 'sprayed' ->> 0, '0')::int AS daily_sprayed,
+                    COALESCE (events.form_data -> 'found' ->> 0, '0')::int AS daily_found
                 FROM events
-                WHERE jurisdictions.jurisdiction_id  = events.location_id
+                WHERE events.location_id = jurisdictions.jurisdiction_id
                 AND events.plan_id = jurisdictions.plan_id
                 AND events.entity_type = 'Structure'
                 AND events.event_type = 'daily_summary'
-                GROUP BY jurisdictions.plan_id, jurisdictions.jurisdiction_id
+                ORDER BY events.location_id, events.form_data ->> 'collection_date', form_data ->> 'supervisor'
             ) AS subq
+            GROUP BY subq.location_id, subq.collection_date
         ) AS daily_summary ON true
         GROUP BY jurisdictions.plan_id, jurisdictions.jurisdiction_id
     ) AS operational_area_query ON operational_area_query.plan_id = plans.identifier
