@@ -13,7 +13,7 @@ SELECT
     jurisdictions.jurisdiction_name_path[4] AS catchment,
     jurisdictions.jurisdiction_name AS jurisdiction,
     structures.village_name,
-    structures.geo_jurisdiction_id,
+    structures.geo_jurisdiction_id AS jurisdiction_id,
     structures.structure_id,
     structures.lat_lon,
     structures.business_status,

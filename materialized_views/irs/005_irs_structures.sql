@@ -129,7 +129,7 @@ FROM (
                                 COALESCE(notsprayed_reason_query.rooms_notsprayed_reasons, ''::text) AS rooms_notsprayed_reasons,
                                 COALESCE(((events.form_data -> 'sprayop_code'::text) ->> 0), ''::text) AS sprayop_code,
                                 COALESCE(((events.form_data -> 'compoundheadstructure'::text) ->> 0), ''::text) AS compoundheadstructure,
-                                COALESCE(((events.form_data -> 'compoundheadname'::text) ->> 0), ''::text) AS compoundheadname,
+                                COALESCE(events.form_data ->> 'compoundheadname', events.form_data ->> 'nameHoH', ''::text) AS compoundheadname,
                                 COALESCE(mix_serial_numbers_query.mix_serial_numbers::text, '0')::integer AS mix_serial_numbers
                             FROM (reveal.events
                             LEFT JOIN reveal.tasks ON (((tasks.identifier)::text = (events.task_id)::text)))
