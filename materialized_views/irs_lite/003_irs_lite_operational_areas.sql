@@ -81,7 +81,6 @@ FROM (
                 AND events.event_type = 'daily_summary'
                 ORDER BY events.location_id, events.form_data ->> 'collection_date', form_data ->> 'supervisor'
             ) AS subq
-            GROUP BY subq.location_id, subq.collection_date
         ) AS daily_summary ON true
         GROUP BY jurisdictions.plan_id, jurisdictions.jurisdiction_id
     ) AS operational_area_query ON operational_area_query.plan_id = plans.identifier
