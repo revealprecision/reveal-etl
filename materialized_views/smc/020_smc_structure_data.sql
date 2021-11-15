@@ -59,6 +59,7 @@ LEFT JOIN LATERAL (
         form_data
     FROM reveal.events
     WHERE structures.structure_id::text = events.structure_id::text
+    AND structures.plan_id::text = events.plan_id::text
     AND events.event_type = 'mda_drug_reconciliation'
     ORDER BY event_date DESC
     LIMIT 1

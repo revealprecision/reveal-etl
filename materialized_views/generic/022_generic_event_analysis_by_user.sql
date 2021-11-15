@@ -20,11 +20,11 @@ FROM (
 ) stats_query
 LEFT JOIN LATERAL (
     SELECT
+        events.event_date AS latest_event_date,
         events.details ->> 'appVersionName' AS appVersion
     FROM
         events
     WHERE
         events.provider_id = stats_query.user_id
-    GROUP BY events.provider_id, events.details ->> 'appVersionName'
-    ORDER BY events.provider_id, CASE events.details ->> 'appVersionName' WHEN '5.3.26' THEN 0 ELSE 1 END DESC LIMIT 1
+    ORDER BY events.event_date DESC LIMIT 1
 ) version_query ON TRUE;
