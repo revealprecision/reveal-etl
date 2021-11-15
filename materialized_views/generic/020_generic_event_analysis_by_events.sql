@@ -13,7 +13,8 @@ SELECT
     events.provider_id AS user_id,
     form_data ->> 'start_time' AS start_time,
     form_data ->> 'end_time' AS end_time,
-    (form_data ->> 'end_time')::timestamp - (form_data ->> 'start_time')::timestamp AS capture_time
+    (form_data ->> 'end_time')::timestamp - (form_data ->> 'start_time')::timestamp AS capture_time,
+    events.details ->> 'appVersionName' AS appVersion
 FROM
     reveal.events events
 WHERE
