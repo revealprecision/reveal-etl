@@ -13,18 +13,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Output Run ID
+        run: echo ${{ github.run_id }}
+
+    - name: Output Run Number
+        run: echo ${{ github.run_number }}
+
     - name: Checkout the code
       uses: actions/checkout@v2
 
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag reveal-etl:$(date +%s)
+    # - name: Build the Docker image
+    #   run: docker build . --file Dockerfile --tag reveal-etl:$(date +%s)
 
-    - name: Push the Docker image
-      uses: docker/build-push-action@v1
+    - name: Login to DockerHub
+      uses: docker/login-action@v1
       with:
         username: revealprecision
         password: ${{ secrets.DOCKERHUB_TOKEN }}
-        repository: revealprecision/reveal-etl
-        push: ${{ GitHub.event_name != 'pull_request' }}
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
+
+    - name: Build and push
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        push: true
+        tags: reveal-precision/reveal-etl:v${{ github.run_number }}
