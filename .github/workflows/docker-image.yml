@@ -14,16 +14,13 @@ jobs:
 
     steps:
     - name: Output Run ID
-        run: echo ${{ github.run_id }}
+      run: echo ${{ github.run_id }}
 
     - name: Output Run Number
-        run: echo ${{ github.run_number }}
+      run: echo ${{ github.run_number }}
 
     - name: Checkout the code
       uses: actions/checkout@v2
-
-    # - name: Build the Docker image
-    #   run: docker build . --file Dockerfile --tag reveal-etl:$(date +%s)
 
     - name: Login to DockerHub
       uses: docker/login-action@v1
