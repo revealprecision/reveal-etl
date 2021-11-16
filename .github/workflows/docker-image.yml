@@ -1,0 +1,24 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: none
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag reveal-etl:$(date +%s)
+    - uses: docker/build-push-action@v1
+    - name: Push the Docker image
+      with:
+        username: revealprecision
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+        repository: revealprecision/reveal-etl
