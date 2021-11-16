@@ -13,12 +13,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
     - name: Build the Docker image
+      uses: actions/checkout@v2
       run: docker build . --file Dockerfile --tag reveal-etl:$(date +%s)
-    - uses: docker/build-push-action@v1
+
     - name: Push the Docker image
+      uses: docker/build-push-action@v1
       with:
         username: revealprecision
         password: ${{ secrets.DOCKERHUB_TOKEN }}
         repository: revealprecision/reveal-etl
+        push: ${{ GitHub.event_name != 'pull_request' }}
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
