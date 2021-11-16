@@ -13,9 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Output Run ID
-      run: echo ${{ github.run_id }}
-
+    
     - name: Output Run Number
       run: echo ${{ github.run_number }}
 
@@ -33,4 +31,4 @@ jobs:
       with:
         context: .
         push: true
-        tags: reveal-precision/reveal-etl:v${{ github.run_number }}
+        tags: revealprecision/reveal-etl:v${{ github.run_number }}
