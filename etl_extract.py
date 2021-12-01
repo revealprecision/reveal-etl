@@ -19,14 +19,14 @@ def extract_opensrp_data(src,dst):
     elif src == "core.event":
         sql = "select max(full_json ->> 'dateCreated') as max_date from reveal.raw_events;"
         max_date = fetch_reveal_query(sql)
-        if max_date[0][0] == 'None':
+        if max_date[0][0] is None:
             sql = "SELECT json FROM " + src + " WHERE (json ->> 'dateCreated')::timestamp > (NOW() - INTERVAL '" + etl_global.data_pull_interval + " HOUR')::timestamp order by json ->>  'dateCreated';"
         else:
             sql = "SELECT json FROM " + src + " WHERE (json ->> 'dateCreated')::timestamp > (('" + max_date[0][0] + "')::date - INTERVAL '" + etl_global.data_pull_interval + " HOUR')::timestamp order by json ->>  'dateCreated';"
     elif src == "core.settings_metadata":
         sql = "select max((data ->> 'serverVersion')::integer) as server_version from reveal.raw_settings;"
         server_version = fetch_reveal_query(sql)
-        if server_version[0][0] == 'None':
+        if server_version[0][0] is None:
             sql = "SELECT json FROM " + src
         else:
             sql = "SELECT json FROM " + src + " WHERE (json ->> 'serverVersion')::integer > " + str(server_version[0][0])
