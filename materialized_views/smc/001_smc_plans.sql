@@ -23,6 +23,7 @@ SELECT plans.identifier AS plan_id,
                 WHERE ((plans.identifier)::text = (plan_jurisdiction.plan_id)::text)) subq) AS jurisdiction_root_parent_ids
 FROM reveal.plans plans
 WHERE ((plans.status)::text = ANY ((ARRAY['active'::character varying, 'complete'::character varying])::text[]))
+AND plans.intervention_type = ('Dynamic-MDA')
 ORDER BY plans.date DESC;
 
 CREATE UNIQUE INDEX IF NOT EXISTS smc_plans_index ON smc_plans (plan_id);
