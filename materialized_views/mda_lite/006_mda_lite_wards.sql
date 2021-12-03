@@ -417,7 +417,17 @@ FROM (
                     COALESCE(CASE WHEN events.form_data ->> 'drugs' = 'MEB' THEN events.form_data ->> 'treated_female_5_to_14' END, '0')::INTEGER +
                     COALESCE(CASE WHEN events.form_data ->> 'drugs' = 'MEB' THEN events.form_data ->> 'treated_female_5_to_15' END, '0')::INTEGER +
                     COALESCE(CASE WHEN events.form_data ->> 'drugs' = 'MEB' THEN events.form_data ->> 'treated_female_above_16' END, '0')::INTEGER +
-                    COALESCE(CASE WHEN events.form_data ->> 'drugs' = 'MEB' THEN events.form_data ->> 'treated_female_above_15' END, '0')::INTEGER
+                    COALESCE(CASE WHEN events.form_data ->> 'drugs' = 'MEB' THEN events.form_data ->> 'treated_female_above_15' END, '0')::INTEGER +
+                    COALESCE(CASE WHEN events.form_data ->> 'drugs' = 'MBZ' THEN events.form_data ->> 'treated_male_1_to_4' END, '0')::INTEGER +
+                    COALESCE(CASE WHEN events.form_data ->> 'drugs' = 'MBZ' THEN events.form_data ->> 'treated_male_5_to_14' END, '0')::INTEGER +
+                    COALESCE(CASE WHEN events.form_data ->> 'drugs' = 'MBZ' THEN events.form_data ->> 'treated_male_5_to_15' END, '0')::INTEGER +
+                    COALESCE(CASE WHEN events.form_data ->> 'drugs' = 'MBZ' THEN events.form_data ->> 'treated_male_above_16' END, '0')::INTEGER +
+                    COALESCE(CASE WHEN events.form_data ->> 'drugs' = 'MBZ' THEN events.form_data ->> 'treated_male_above_15' END, '0')::INTEGER +
+                    COALESCE(CASE WHEN events.form_data ->> 'drugs' = 'MBZ' THEN events.form_data ->> 'treated_female_1_to_4' END, '0')::INTEGER +
+                    COALESCE(CASE WHEN events.form_data ->> 'drugs' = 'MBZ' THEN events.form_data ->> 'treated_female_5_to_14' END, '0')::INTEGER +
+                    COALESCE(CASE WHEN events.form_data ->> 'drugs' = 'MBZ' THEN events.form_data ->> 'treated_female_5_to_15' END, '0')::INTEGER +
+                    COALESCE(CASE WHEN events.form_data ->> 'drugs' = 'MBZ' THEN events.form_data ->> 'treated_female_above_16' END, '0')::INTEGER +
+                    COALESCE(CASE WHEN events.form_data ->> 'drugs' = 'MBZ' THEN events.form_data ->> 'treated_female_above_15' END, '0')::INTEGER
                 ) AS meb_total_treated,
 
                 SUM(COALESCE(CASE WHEN events.form_data ->> 'drugs' = 'ALB' THEN events.form_data ->> 'treated_male_1_to_4' END, '0')::INTEGER +
