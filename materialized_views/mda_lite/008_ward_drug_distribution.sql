@@ -3,8 +3,7 @@ DROP MATERIALIZED VIEW IF EXISTS ward_drug_distribution CASCADE;
 CREATE MATERIALIZED VIEW IF NOT EXISTS ward_drug_distribution AS
 SELECT
     subq.*,
-    0 AS average_per_day
-    --(subq.total_all_genders / subq.days_worked) as average_per_day
+    CASE WHEN subq.days_worked  = 0 THEN 0 ELSE (subq.total_all_genders / subq.days_worked) END AS average_per_day
 FROM (
          SELECT
              public.uuid_generate_v5(
@@ -19,8 +18,7 @@ FROM (
              events.plan_id,
              events.structure_id AS base_entity_id,
              events.form_data -> 'cdd_name'::text AS cdd_name,
-             -- ISSUE count(DISTINCT TO_CHAR(date_created :: DATE, 'dd/mm/yyyy')) as days_worked,
-             0 AS days_worked,
+             count(events.form_data ->> 'date') as days_worked,
              sum(COALESCE((events.form_data -> 'health_education_above_16'::text) ->> 0, '0'::text)::bigint) AS health_education_above_16,
              sum(COALESCE((events.form_data -> 'health_education_5_to_15'::text) ->> 0, '0'::text)::bigint) AS health_education_5_to_15,
              sum(COALESCE(case when events.form_data ->> 'drugs' = 'ALB' then events.form_data ->> 'treated_male_1_to_4' end,'0')::integer) as alb_treated_male_1_4,
