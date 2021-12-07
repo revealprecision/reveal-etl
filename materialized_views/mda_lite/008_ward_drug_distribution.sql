@@ -3,22 +3,24 @@ DROP MATERIALIZED VIEW IF EXISTS ward_drug_distribution CASCADE;
 CREATE MATERIALIZED VIEW IF NOT EXISTS ward_drug_distribution AS
 SELECT
     subq.*,
-    (subq.total_all_genders / subq.days_worked) as average_per_day
+    0 AS average_per_day
+    --(subq.total_all_genders / subq.days_worked) as average_per_day
 FROM (
          SELECT
              public.uuid_generate_v5(
                      '6ba7b810-9dad-11d1-80b4-00c04fd430c8',
-                     concat(events.base_entity_id, events.plan_id, events.form_data -> 'cdd_name', events.form_data -> 'health_worker_supervisor')
+                     concat(events.structure_id, events.plan_id, events.form_data -> 'cdd_name', events.form_data -> 'health_worker_supervisor')
                  ) AS id,
              public.uuid_generate_v5(
                      '6ba7b810-9dad-11d1-80b4-00c04fd430c8',
-                     concat(events.base_entity_id, events.plan_id, events.form_data -> 'health_worker_supervisor')
+                     concat(events.structure_id, events.plan_id, events.form_data -> 'health_worker_supervisor')
                  ) AS supervisor_id,
              events.form_data -> 'health_worker_supervisor'::text AS supervisor_name,
              events.plan_id,
-             events.base_entity_id,
+             events.structure_id AS base_entity_id,
              events.form_data -> 'cdd_name'::text AS cdd_name,
-             count(DISTINCT TO_CHAR(date_created :: DATE, 'dd/mm/yyyy')) as days_worked,
+             -- ISSUE count(DISTINCT TO_CHAR(date_created :: DATE, 'dd/mm/yyyy')) as days_worked,
+             0 AS days_worked,
              sum(COALESCE((events.form_data -> 'health_education_above_16'::text) ->> 0, '0'::text)::bigint) AS health_education_above_16,
              sum(COALESCE((events.form_data -> 'health_education_5_to_15'::text) ->> 0, '0'::text)::bigint) AS health_education_5_to_15,
              sum(COALESCE(case when events.form_data ->> 'drugs' = 'ALB' then events.form_data ->> 'treated_male_1_to_4' end,'0')::integer) as alb_treated_male_1_4,
@@ -252,10 +254,9 @@ FROM (
              sum(COALESCE((events.form_data -> 'mebendazole_returned'::text) ->> 0, '0'::text)::integer) AS mbz_returned_to_supervisor,
              sum(COALESCE((events.form_data -> 'vita_returned'::text) ->> 0, '0'::text)::integer) vita_returned_to_supervisor
 
-         FROM events
+         FROM mda_lite_structure_unique_events events
          WHERE events.event_type::text = ANY (ARRAY['tablet_accountability'::character varying, 'cdd_supervisor_daily_summary'::character varying,'cell_coordinator_daily_summary'::character varying]::text[])
-  AND events.entity_type = 'Structure'
-         GROUP BY (events.form_data -> 'cdd_name'::text), (events.form_data -> 'health_worker_supervisor'::text), events.plan_id, events.base_entity_id
+         GROUP BY (events.form_data -> 'cdd_name'::text), (events.form_data -> 'health_worker_supervisor'::text), events.plan_id, events.structure_id
      ) as subq;
 
 CREATE INDEX IF NOT EXISTS ward_drug_distribution_base_entity_id_idx ON ward_drug_distribution (base_entity_id);

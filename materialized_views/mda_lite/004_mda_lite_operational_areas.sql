@@ -803,10 +803,9 @@ CASE
                     SUM(COALESCE((events.form_data -> 'albendazole_returned'::TEXT) ->> 0, '0'::TEXT)::INTEGER) AS alb_returned_to_supervisor,
                     SUM(COALESCE((events.form_data -> 'mebendazole_returned'::TEXT) ->> 0, '0'::TEXT)::INTEGER) AS mbz_returned_to_supervisor,
                     SUM(COALESCE((events.form_data -> 'vita_returned'::TEXT) ->> 0, '0'::TEXT)::INTEGER) vita_returned_to_supervisor
-                FROM events
+                FROM mda_lite_structure_unique_events events
                 WHERE jurisdictions.structure_jurisdiction_id  = events.location_id
                 AND events.plan_id = jurisdictions.plan_id
-                AND events.entity_type = 'Structure'
                 AND events.event_type IN ('cdd_supervisor_daily_summary', 'tablet_accountability','cell_coordinator_daily_summary')
                 GROUP BY jurisdictions.plan_id, jurisdictions.structure_jurisdiction_id
             ) AS subq
