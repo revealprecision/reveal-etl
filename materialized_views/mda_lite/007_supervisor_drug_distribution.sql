@@ -4,10 +4,10 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS supervisor_drug_distribution AS
 SELECT
     public.uuid_generate_v5(
             '6ba7b810-9dad-11d1-80b4-00c04fd430c8',
-            concat(events.base_entity_id, events.plan_id, events.form_data -> 'health_worker_supervisor')
+            concat(events.structure_id, events.plan_id, events.form_data -> 'health_worker_supervisor')
         ) AS id,
     events.form_data -> 'health_worker_supervisor'::text AS supervisor_name,
-    events.base_entity_id AS base_entity_id,
+    events.structure_id AS base_entity_id,
     events.plan_id AS plan_id,
     sum(COALESCE((events.form_data -> 'health_education_above_16'::text) ->> 0, '0'::text)::bigint) AS health_education_above_16,
     sum(COALESCE((events.form_data -> 'health_education_5_to_15'::text) ->> 0, '0'::text)::bigint) AS health_education_5_to_15,
@@ -241,10 +241,9 @@ SELECT
     sum(COALESCE((events.form_data -> 'albendazole_returned'::text) ->> 0, '0'::text)::integer) AS alb_returned_to_supervisor,
     sum(COALESCE((events.form_data -> 'mebendazole_returned'::text) ->> 0, '0'::text)::integer) AS mbz_returned_to_supervisor,
     sum(COALESCE((events.form_data -> 'vita_returned'::text) ->> 0, '0'::text)::integer) vita_returned_to_supervisor
-FROM events
+FROM mda_lite_structure_unique_events events
 WHERE events.event_type::text = ANY (ARRAY['tablet_accountability'::character varying, 'cdd_supervisor_daily_summary'::character varying,'cell_coordinator_daily_summary'::character varying]::text[])
-AND events.entity_type = 'Structure'
-GROUP BY (events.form_data -> 'health_worker_supervisor'::text), events.base_entity_id, events.plan_id;
+GROUP BY (events.form_data -> 'health_worker_supervisor'::text), events.structure_id, events.plan_id;
 
 CREATE INDEX IF NOT EXISTS supervisor_drug_distribution_base_entity_id_idx ON supervisor_drug_distribution (base_entity_id);
 CREATE INDEX IF NOT EXISTS supervisor_drug_distribution_plan_id_idx ON supervisor_drug_distribution (plan_id);
