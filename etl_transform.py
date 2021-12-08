@@ -91,14 +91,14 @@ def transform_reveal_event_data():
 
         etl_database.store_reveal_query(sql)
 
-        sql = "SELECT json_object_agg(fieldCode, response) AS data_object FROM ( SELECT CASE WHEN (line_data ->> 'fieldCode' = '163137AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') THEN 'start_time' WHEN (line_data ->> 'fieldCode' = '163138AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') THEN 'end_time' WHEN (line_data ->> 'fieldCode' = '163152AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') THEN 'device_phone_number' ELSE (line_data ->> 'fieldCode') END AS fieldCode, regexp_replace((line_data ->> 'values')::text, '[''\"\[\]]+', '', 'gi') AS response FROM ( SELECT jsonb_array_elements(full_json -> 'obs') AS line_data FROM reveal.raw_events WHERE ((id)::text = '" + str(data_line[0]) + "')) status_line ) as form_object;"
+        sql = "SELECT json_object_agg(fieldCode, response) AS data_object FROM ( SELECT CASE WHEN (line_data ->> 'fieldCode' = '163137AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') THEN 'start_time' WHEN (line_data ->> 'fieldCode' = '163138AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') THEN 'end_time' WHEN (line_data ->> 'fieldCode' = '163152AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') THEN 'device_phone_number' ELSE (line_data ->> 'formSubmissionField') END AS fieldCode, regexp_replace((line_data ->> 'values')::text, '[''\"\[\]]+', '', 'gi') AS response FROM ( SELECT jsonb_array_elements(full_json -> 'obs') AS line_data FROM reveal.raw_events WHERE ((id)::text = '" + str(data_line[0]) + "')) status_line ) as form_object;"
 
         data_object = etl_database.fetch_reveal_query(sql)
 
         sql = "UPDATE reveal.events SET form_data = '" + json.dumps(data_object[0][0]).replace("'",r"''") + "' WHERE id = '" + str(data_line[0]) + "'"
         etl_database.store_reveal_query(sql)
 
-        sql = "SELECT id AS event_id, line_data ->> 'fieldCode' AS fieldCode, line_data -> 'values' ->> 0 AS response FROM ( SELECT id, jsonb_array_elements(full_json -> 'obs') AS line_data FROM reveal.raw_events WHERE (id)::text = '" + str(data_line[0]) + "') status_line;"
+        sql = "SELECT id AS event_id, line_data ->> 'formSubmissionField' AS fieldCode, line_data -> 'values' ->> 0 AS response FROM ( SELECT id, jsonb_array_elements(full_json -> 'obs') AS line_data FROM reveal.raw_events WHERE (id)::text = '" + str(data_line[0]) + "') status_line;"
 
         data_split = etl_database.fetch_reveal_query(sql)
 

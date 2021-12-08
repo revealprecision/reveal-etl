@@ -251,7 +251,7 @@ FROM (
         JOIN mda_lite_operational_areas AS parents ON locations.jurisdiction_id = parents.jurisdiction_id
         LEFT JOIN LATERAL (
             SELECT
-                events.base_entity_id,
+                events.structure_id AS base_entity_id,
                 SUM(COALESCE((events.form_data -> 'health_education_above_16'::TEXT) ->> 0, '0'::TEXT)::bigint) AS health_education_above_16,
                 SUM(COALESCE((events.form_data -> 'health_education_5_to_15'::TEXT) ->> 0, '0'::TEXT)::bigint) AS health_education_5_to_15,
                 SUM(COALESCE(CASE WHEN events.form_data ->> 'drugs' = 'ALB' THEN events.form_data ->> 'treated_male_1_to_4' END, '0')::INTEGER) AS alb_treated_male_1_4,
@@ -417,7 +417,17 @@ FROM (
                     COALESCE(CASE WHEN events.form_data ->> 'drugs' = 'MEB' THEN events.form_data ->> 'treated_female_5_to_14' END, '0')::INTEGER +
                     COALESCE(CASE WHEN events.form_data ->> 'drugs' = 'MEB' THEN events.form_data ->> 'treated_female_5_to_15' END, '0')::INTEGER +
                     COALESCE(CASE WHEN events.form_data ->> 'drugs' = 'MEB' THEN events.form_data ->> 'treated_female_above_16' END, '0')::INTEGER +
-                    COALESCE(CASE WHEN events.form_data ->> 'drugs' = 'MEB' THEN events.form_data ->> 'treated_female_above_15' END, '0')::INTEGER
+                    COALESCE(CASE WHEN events.form_data ->> 'drugs' = 'MEB' THEN events.form_data ->> 'treated_female_above_15' END, '0')::INTEGER +
+                    COALESCE(CASE WHEN events.form_data ->> 'drugs' = 'MBZ' THEN events.form_data ->> 'treated_male_1_to_4' END, '0')::INTEGER +
+                    COALESCE(CASE WHEN events.form_data ->> 'drugs' = 'MBZ' THEN events.form_data ->> 'treated_male_5_to_14' END, '0')::INTEGER +
+                    COALESCE(CASE WHEN events.form_data ->> 'drugs' = 'MBZ' THEN events.form_data ->> 'treated_male_5_to_15' END, '0')::INTEGER +
+                    COALESCE(CASE WHEN events.form_data ->> 'drugs' = 'MBZ' THEN events.form_data ->> 'treated_male_above_16' END, '0')::INTEGER +
+                    COALESCE(CASE WHEN events.form_data ->> 'drugs' = 'MBZ' THEN events.form_data ->> 'treated_male_above_15' END, '0')::INTEGER +
+                    COALESCE(CASE WHEN events.form_data ->> 'drugs' = 'MBZ' THEN events.form_data ->> 'treated_female_1_to_4' END, '0')::INTEGER +
+                    COALESCE(CASE WHEN events.form_data ->> 'drugs' = 'MBZ' THEN events.form_data ->> 'treated_female_5_to_14' END, '0')::INTEGER +
+                    COALESCE(CASE WHEN events.form_data ->> 'drugs' = 'MBZ' THEN events.form_data ->> 'treated_female_5_to_15' END, '0')::INTEGER +
+                    COALESCE(CASE WHEN events.form_data ->> 'drugs' = 'MBZ' THEN events.form_data ->> 'treated_female_above_16' END, '0')::INTEGER +
+                    COALESCE(CASE WHEN events.form_data ->> 'drugs' = 'MBZ' THEN events.form_data ->> 'treated_female_above_15' END, '0')::INTEGER
                 ) AS meb_total_treated,
 
                 SUM(COALESCE(CASE WHEN events.form_data ->> 'drugs' = 'ALB' THEN events.form_data ->> 'treated_male_1_to_4' END, '0')::INTEGER +
@@ -557,12 +567,11 @@ FROM (
                 SUM(COALESCE((events.form_data -> 'albendazole_returned'::TEXT) ->> 0, '0'::TEXT)::INTEGER) AS alb_returned_to_supervisor,
                 SUM(COALESCE((events.form_data -> 'mebendazole_returned'::TEXT) ->> 0, '0'::TEXT)::INTEGER) AS mbz_returned_to_supervisor,
                 SUM(COALESCE((events.form_data -> 'vita_returned'::TEXT) ->> 0, '0'::TEXT)::INTEGER) vita_returned_to_supervisor
-            FROM events
-            WHERE events.base_entity_id = locations.id
+            FROM mda_lite_structure_unique_events events
+            WHERE events.structure_id = locations.id
             AND events.event_type IN ('tablet_accountability', 'cdd_supervisor_daily_summary','cell_coordinator_daily_summary')
-            AND events.entity_type = 'Structure'
             AND parents.plan_id = events.plan_id
-            GROUP BY events.base_entity_id, locations.name, parents.jurisdiction_id, parents.plan_id
+            GROUP BY events.structure_id, locations.name, parents.jurisdiction_id, parents.plan_id
         ) events_query ON TRUE
     ) AS subq
 LEFT JOIN mda_lite_wards_population AS wards_population ON wards_population.ward_id = subq.base_entity_id;

@@ -253,7 +253,7 @@ CASE
         COALESCE(wards_population.census_pop_target_5_to_15_official, 0) AS census_pop_target_5_to_15_official,
         COALESCE(wards_population.other_pop_target_5_to_15_trusted, 0) AS other_pop_target_5_to_15_trusted,
         (COALESCE(wards_population.census_pop_target_5_to_15_official, 0) + COALESCE(wards_population.census_pop_target_above_16_official, 0)) AS census_pop_target_5_to_15_and_above_16_official
-    FROM plans
+    FROM mda_lite_plans plans
     LEFT JOIN (
         SELECT
             jurisdictions.plan_id,
@@ -803,16 +803,15 @@ CASE
                     SUM(COALESCE((events.form_data -> 'albendazole_returned'::TEXT) ->> 0, '0'::TEXT)::INTEGER) AS alb_returned_to_supervisor,
                     SUM(COALESCE((events.form_data -> 'mebendazole_returned'::TEXT) ->> 0, '0'::TEXT)::INTEGER) AS mbz_returned_to_supervisor,
                     SUM(COALESCE((events.form_data -> 'vita_returned'::TEXT) ->> 0, '0'::TEXT)::INTEGER) vita_returned_to_supervisor
-                FROM events
+                FROM mda_lite_structure_unique_events events
                 WHERE jurisdictions.structure_jurisdiction_id  = events.location_id
                 AND events.plan_id = jurisdictions.plan_id
-                AND events.entity_type = 'Structure'
                 AND events.event_type IN ('cdd_supervisor_daily_summary', 'tablet_accountability','cell_coordinator_daily_summary')
                 GROUP BY jurisdictions.plan_id, jurisdictions.structure_jurisdiction_id
             ) AS subq
         ) AS daily_summary ON TRUE
         GROUP BY jurisdictions.plan_id, jurisdictions.structure_jurisdiction_id
-    ) AS operational_area_query ON operational_area_query.plan_id = plans.identifier
+    ) AS operational_area_query ON operational_area_query.plan_id = plans.plan_id
     LEFT JOIN jurisdictions_tree AS lite_jurisdictions ON operational_area_query.structure_jurisdiction_id = lite_jurisdictions.jurisdiction_id
     LEFT JOIN LATERAL (
         SELECT
