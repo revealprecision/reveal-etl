@@ -139,13 +139,12 @@ FROM (
                                 COALESCE(((events.form_data -> 'sprayop_code'::text) ->> 0), ''::text) AS sprayop_code,
                                 COALESCE(((events.form_data -> 'compoundheadstructure'::text) ->> 0), ''::text) AS compoundheadstructure,
                                 COALESCE(events.form_data ->> 'compoundheadname', events.form_data ->> 'nameHoH', ''::text) AS compoundheadname,
-                                COALESCE(mix_serial_numbers_query.mix_serial_numbers::text, '0')::integer AS mix_serial_numbers
+                                COALESCE(mix_serial_numbers_query.mix_serial_numbers::text, '0')::integer AS mix_serial_numbers,
 
-                                to_json(COALESCE(events.form_data -> 'sprayed_nets_available','0')) #>> '{}' AS sprayed_nets_available,
-                                to_json(COALESCE(events.form_data -> 'sprayed_nets_use','0')) #>> '{}' AS sprayed_nets_use,
-                                to_json(COALESCE(events.form_data -> 'sprayed_pregwomen_uNet','0')) #>> '{}' AS sprayed_pregwomen_uNet,
-                                to_json(COALESCE(events.form_data -> 'sprayed_u5_uNet','0')) #>> '{}' AS sprayed_u5_uNet
-
+                                COALESCE((events.form_data -> 'sprayed_nets_available')->>0,'0') as sprayed_nets_available,
+                                COALESCE((events.form_data -> 'sprayed_nets_use')->>0,'0') as sprayed_nets_use,
+                                COALESCE((events.form_data -> 'sprayed_pregwomen_uNet')->>0,'0') as sprayed_pregwomen_uNet,
+                                COALESCE((events.form_data -> 'sprayed_u5_uNet')->>0,'0') as sprayed_u5_uNet
 
                             FROM (reveal.events
                             LEFT JOIN reveal.tasks ON (((tasks.identifier)::text = (events.task_id)::text)))
