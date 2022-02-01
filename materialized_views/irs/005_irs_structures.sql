@@ -48,6 +48,10 @@ SELECT
     COALESCE(events_query.mix_serial_numbers, 0) AS mix_serial_numbers,
     COALESCE(events_query.duplicate, false) AS duplicate,
     COALESCE(events_query.sprayed_duplicate, false) AS sprayed_duplicate
+    COALESCE(events_query.sprayed_nets_available, '0') AS sprayed_nets_available,
+    COALESCE(events_query.sprayed_nets_use, '0') AS sprayed_nets_use,
+    COALESCE(events_query.sprayed_pregwomen_uNet, '0') AS sprayed_pregwomen_uNet,
+    COALESCE(events_query.sprayed_u5_uNet, '0') AS sprayed_u5_uNet,
 FROM (
     (
         (
@@ -86,6 +90,11 @@ FROM (
                             subq.notsprayed_females AS notsprayed_females,
                             subq.notsprayed_pregwomen AS notsprayed_pregwomen,
                             subq.notsprayed_childrenU5 AS notsprayed_childrenU5,
+
+                            subq.sprayed_nets_available AS sprayed_nets_available,
+                            subq.sprayed_nets_use AS sprayed_nets_use,
+                            subq.sprayed_pregwomen_uNet AS sprayed_pregwomen_uNet,
+                            subq.sprayed_u5_uNet AS sprayed_u5_uNet,
 
                             array_agg(subq.structure_sprayed) OVER (PARTITION BY subq.structure_sprayed) AS sprayed_values,
                             array_agg(subq.notsprayed_reason) FILTER (WHERE (subq.notsprayed_reason <> ''::text)) OVER (PARTITION BY subq.notsprayed_reason) AS notsprayed_reasons,
@@ -131,6 +140,13 @@ FROM (
                                 COALESCE(((events.form_data -> 'compoundheadstructure'::text) ->> 0), ''::text) AS compoundheadstructure,
                                 COALESCE(events.form_data ->> 'compoundheadname', events.form_data ->> 'nameHoH', ''::text) AS compoundheadname,
                                 COALESCE(mix_serial_numbers_query.mix_serial_numbers::text, '0')::integer AS mix_serial_numbers
+
+                                to_json(COALESCE(events.form_data -> 'sprayed_nets_available','0')) #>> '{}' AS sprayed_nets_available,
+                                to_json(COALESCE(events.form_data -> 'sprayed_nets_use','0')) #>> '{}' AS sprayed_nets_use,
+                                to_json(COALESCE(events.form_data -> 'sprayed_pregwomen_uNet','0')) #>> '{}' AS sprayed_pregwomen_uNet,
+                                to_json(COALESCE(events.form_data -> 'sprayed_u5_uNet','0')) #>> '{}' AS sprayed_u5_uNet
+
+
                             FROM (reveal.events
                             LEFT JOIN reveal.tasks ON (((tasks.identifier)::text = (events.task_id)::text)))
                             LEFT JOIN LATERAL (
