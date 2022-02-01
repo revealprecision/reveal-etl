@@ -51,7 +51,7 @@ SELECT
     COALESCE(events_query.sprayed_nets_available, '0') AS sprayed_nets_available,
     COALESCE(events_query.sprayed_nets_use, '0') AS sprayed_nets_use,
     COALESCE(events_query.sprayed_pregwomen_uNet, '0') AS sprayed_pregwomen_uNet,
-    COALESCE(events_query.sprayed_u5_uNet, '0') AS sprayed_u5_uNet,
+    COALESCE(events_query.sprayed_u5_uNet, '0') AS sprayed_u5_uNet
 FROM (
     (
         (
