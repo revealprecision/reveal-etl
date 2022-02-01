@@ -47,7 +47,7 @@ SELECT
     COALESCE(events_query.compoundheadname, ''::text) AS compoundheadname,
     COALESCE(events_query.mix_serial_numbers, 0) AS mix_serial_numbers,
     COALESCE(events_query.duplicate, false) AS duplicate,
-    COALESCE(events_query.sprayed_duplicate, false) AS sprayed_duplicate
+    COALESCE(events_query.sprayed_duplicate, false) AS sprayed_duplicate,
     COALESCE(events_query.sprayed_nets_available, '0') AS sprayed_nets_available,
     COALESCE(events_query.sprayed_nets_use, '0') AS sprayed_nets_use,
     COALESCE(events_query.sprayed_pregwomen_uNet, '0') AS sprayed_pregwomen_uNet,
