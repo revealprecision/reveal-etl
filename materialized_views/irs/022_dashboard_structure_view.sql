@@ -55,7 +55,7 @@ SELECT
     structures.preferred_source,
     structures.other_preferred_source,
     structures.health_service,
-    structures.district,
+    structures.form_district,
     structures.chw
 FROM reveal.irs_structures structures
 LEFT JOIN reveal.jurisdictions_tree jurisdictions ON (structures.geo_jurisdiction_id = jurisdictions.jurisdiction_id)
