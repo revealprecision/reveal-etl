@@ -245,7 +245,7 @@ FROM (
                         ORDER BY tasks.server_version DESC
                         LIMIT 1
                     ) tasks_query ON (true))
-                    WHERE ((locations.status)::text <> 'Inactive'::text)
+                    WHERE ((locations.status)::text <> 'Inactive'::text);
 
 CREATE INDEX IF NOT EXISTS irs_structures_structure_sprayed_idx ON irs_structures (structure_sprayed);
 CREATE INDEX IF NOT EXISTS irs_structures_business_status_idx ON irs_structures (business_status);
