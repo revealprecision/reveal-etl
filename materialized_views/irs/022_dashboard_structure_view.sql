@@ -35,7 +35,11 @@ SELECT
     structures.compoundheadstructure,
     structures.compoundheadname,
     structures.mix_serial_numbers,
-    structures.event_date
+    structures.event_date,
+    structures.sprayed_nets_available,
+    structures.sprayed_nets_use,
+    structures.sprayed_pregwomen_uNet,
+    structures.sprayed_u5_uNet
 FROM reveal.irs_structures structures
 LEFT JOIN reveal.jurisdictions_tree jurisdictions ON (structures.geo_jurisdiction_id = jurisdictions.jurisdiction_id)
 LEFT JOIN reveal.plans plans ON structures.plan_id = plans.identifier
