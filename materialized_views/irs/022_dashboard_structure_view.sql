@@ -39,7 +39,24 @@ SELECT
     structures.sprayed_nets_available,
     structures.sprayed_nets_use,
     structures.sprayed_pregwomen_uNet,
-    structures.sprayed_u5_uNet
+    structures.sprayed_u5_uNet,
+    structures.new_sachet,
+    structures.refused_reason,
+    structures.other_refused_reason,
+    structures.notsprayedrooms_eligible,
+    structures.notsprayed_nets_available,
+    structures.notsprayed_nets_use,
+    structures.notsprayed_pregwomen_uNet,
+    structures.notsprayed_u5_uNet,
+    structures.sbc,
+    structures.about_malaria,
+    structures.information,
+    structures.other_information,
+    structures.preferred_source,
+    structures.other_preferred_source,
+    structures.health_service,
+    structures.district,
+    structures.chw
 FROM reveal.irs_structures structures
 LEFT JOIN reveal.jurisdictions_tree jurisdictions ON (structures.geo_jurisdiction_id = jurisdictions.jurisdiction_id)
 LEFT JOIN reveal.plans plans ON structures.plan_id = plans.identifier

@@ -51,7 +51,26 @@ SELECT
     COALESCE(events_query.sprayed_nets_available, '0') AS sprayed_nets_available,
     COALESCE(events_query.sprayed_nets_use, '0') AS sprayed_nets_use,
     COALESCE(events_query.sprayed_pregwomen_uNet, '0') AS sprayed_pregwomen_uNet,
-    COALESCE(events_query.sprayed_u5_uNet, '0') AS sprayed_u5_uNet
+    COALESCE(events_query.sprayed_u5_uNet, '0') AS sprayed_u5_uNet,
+
+	COALESCE(events_query.new_sachet,'') as new_sachet,
+	COALESCE(events_query.refused_reason,'') as refused_reason,
+	COALESCE(events_query.other_refused_reason,'') as other_refused_reason,
+	COALESCE(events_query.notsprayedrooms_eligible,'0') as notsprayedrooms_eligible,
+	COALESCE(events_query.notsprayed_nets_available,'0') as notsprayed_nets_available,
+	COALESCE(events_query.notsprayed_nets_use,'0') as notsprayed_nets_use,
+	COALESCE(events_query.notsprayed_pregwomen_uNet,'0') as notsprayed_pregwomen_uNet,
+	COALESCE(events_query.notsprayed_u5_uNet,'0') as notsprayed_u5_uNet,
+	COALESCE(events_query.sbc,'') as sbc,
+	COALESCE(events_query.about_malaria,'') as about_malaria,
+	COALESCE(events_query.information,'') as information,
+	COALESCE(events_query.other_information,'') as other_information,
+	COALESCE(events_query.preferred_source,'') as preferred_source,
+	COALESCE(events_query.other_preferred_source,'') as other_preferred_source,
+	COALESCE(events_query.health_service,'') as health_service,
+	COALESCE(events_query.district,'') as district,
+	COALESCE(events_query.chw,'') as chw
+
 FROM (
     (
         (
@@ -95,6 +114,24 @@ FROM (
                             subq.sprayed_nets_use AS sprayed_nets_use,
                             subq.sprayed_pregwomen_uNet AS sprayed_pregwomen_uNet,
                             subq.sprayed_u5_uNet AS sprayed_u5_uNet,
+
+							subq.new_sachet as new_sachet,
+							subq.refused_reason as refused_reason,
+							subq.other_refused_reason as other_refused_reason,
+							subq.notsprayedrooms_eligible as notsprayedrooms_eligible,
+							subq.notsprayed_nets_available as notsprayed_nets_available,
+							subq.notsprayed_nets_use as notsprayed_nets_use,
+							subq.notsprayed_pregwomen_uNet as notsprayed_pregwomen_uNet,
+							subq.notsprayed_u5_uNet as notsprayed_u5_uNet,
+							subq.sbc as sbc,
+							subq.about_malaria as about_malaria,
+							subq.information as information,
+							subq.other_information as other_information,
+							subq.preferred_source as preferred_source,
+							subq.other_preferred_source as other_preferred_source,
+							subq.health_service as health_service,
+							subq.district as district,
+							subq.chw as chw,
 
                             array_agg(subq.structure_sprayed) OVER (PARTITION BY subq.structure_sprayed) AS sprayed_values,
                             array_agg(subq.notsprayed_reason) FILTER (WHERE (subq.notsprayed_reason <> ''::text)) OVER (PARTITION BY subq.notsprayed_reason) AS notsprayed_reasons,
@@ -144,7 +181,25 @@ FROM (
                                 COALESCE((events.form_data -> 'sprayed_nets_available')->>0,'0') as sprayed_nets_available,
                                 COALESCE((events.form_data -> 'sprayed_nets_use')->>0,'0') as sprayed_nets_use,
                                 COALESCE((events.form_data -> 'sprayed_pregwomen_uNet')->>0,'0') as sprayed_pregwomen_uNet,
-                                COALESCE((events.form_data -> 'sprayed_u5_uNet')->>0,'0') as sprayed_u5_uNet
+                                COALESCE((events.form_data -> 'sprayed_u5_uNet')->>0,'0') as sprayed_u5_uNet,
+
+								COALESCE(events.form_data -> 'new_sachet' ->>0,'') as new_sachet,
+								COALESCE(events.form_data -> 'refused_reason' ->>0,'') as refused_reason,
+								COALESCE(events.form_data -> 'other_refused_reason' ->>0,'') as other_refused_reason,
+								COALESCE(events.form_data -> 'notsprayedrooms_eligible' ->>0,'0') as notsprayedrooms_eligible,
+								COALESCE(events.form_data -> 'notsprayed_nets_available' ->>0,'0') as notsprayed_nets_available,
+								COALESCE(events.form_data -> 'notsprayed_nets_use' ->>0,'0') as notsprayed_nets_use,
+								COALESCE(events.form_data -> 'notsprayed_pregwomen_uNet' ->>0,'0') as notsprayed_pregwomen_uNet,
+								COALESCE(events.form_data -> 'notsprayed_u5_uNet' ->>0,'0') as notsprayed_u5_uNet,
+								COALESCE(events.form_data -> 'sbc' ->>0,'') as sbc,
+								COALESCE(events.form_data -> 'about_malaria' ->>0,'') as about_malaria,
+								COALESCE(events.form_data -> 'information' ->>0,'') as information,
+								COALESCE(events.form_data -> 'other_information' ->>0,'') as other_information,
+								COALESCE(events.form_data -> 'preferred_source' ->>0,'') as preferred_source,
+								COALESCE(events.form_data -> 'other_preferred_source' ->>0,'') as other_preferred_source,
+								COALESCE(events.form_data -> 'health_service' ->>0,'') as health_service,
+								COALESCE(events.form_data -> 'districtName' ->>0,'') as district,
+								COALESCE(events.form_data -> 'chw' ->>0,'') as chw
 
                             FROM (reveal.events
                             LEFT JOIN reveal.tasks ON (((tasks.identifier)::text = (events.task_id)::text)))
