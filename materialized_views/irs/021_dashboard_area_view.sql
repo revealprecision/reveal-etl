@@ -34,8 +34,9 @@ SELECT
     irs_focus_area_base.notsprayed_males,
     irs_focus_area_base.notsprayed_females,
     irs_focus_area_base.notsprayed_pregwomen,
-    irs_focus_area_base.notsprayed_childrenU5
-FROM irs_focus_area_base irs_focus_area_base
+    irs_focus_area_base.notsprayed_childrenU5,
+    irs_focus_area_base.reviewed_with_decision
+FROM reveal.irs_focus_area_base irs_focus_area_base
 LEFT JOIN reveal.plans plans ON irs_focus_area_base.plan_id = plans.identifier;
 
 CREATE INDEX IF NOT EXISTS dashboard_area_view_plan_id_idx ON dashboard_area_view (plan_id);
