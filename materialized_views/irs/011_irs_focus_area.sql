@@ -1,3 +1,5 @@
+SET schema 'reveal';
+
 DROP MATERIALIZED VIEW IF EXISTS irs_focus_area CASCADE;
 
 CREATE MATERIALIZED VIEW IF NOT EXISTS irs_focus_area
